@@ -96,6 +96,7 @@
         <button class="pill-tab" id="btn-broadcast" onclick="switchTab('broadcast')"><i class="ph-bold ph-megaphone"></i> ประกาศ</button>
     </div>
 
+    <!-- 🗂️ หน้า 1: ออเดอร์ค้าง -->
     <div id="tab-drafts" class="tab-content active">
         <div id="order-container"><p style="text-align: center; color: #726E68;">กำลังโหลดออเดอร์ล่าสุด...</p></div>
         <div id="empty-state">
@@ -104,10 +105,12 @@
         </div>
     </div>
 
+    <!-- 🗂️ หน้า 2: จัดการเมนู -->
     <div id="tab-menu" class="tab-content">
         <div class="order-card" id="menu-container" style="padding: 15px;"><p style="text-align: center; color: #726E68;">กำลังโหลดเมนู...</p></div>
     </div>
 
+    <!-- 🗂️ หน้า 3: ตั้งค่าร้าน -->
     <div id="tab-settings" class="tab-content">
         <div class="switch-wrapper">
             <span class="switch-label"><i class="ph-fill ph-robot"></i> AI ตอบบิลอัตโนมัติ (2 นาที)</span>
@@ -156,6 +159,7 @@
         </div>
     </div>
 
+    <!-- 🗂️ หน้า 4: คำถาม FAQ -->
     <div id="tab-faq" class="tab-content">
         <div class="order-card">
             <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #45423E; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; color: var(--col-accent);">
@@ -167,6 +171,7 @@
         </div>
     </div>
 
+    <!-- 🗂️ หน้า 5: บรอดแคสต์ -->
     <div id="tab-broadcast" class="tab-content">
         <div class="order-card">
             <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #45423E; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; color: var(--col-accent);"><i class="ph-bold ph-megaphone"></i> ส่งข้อความประกาศ</h3>
@@ -192,8 +197,9 @@
     <button class="refresh-btn" onclick="refreshCurrentTab()"><i class="ph-bold ph-arrows-clockwise"></i></button>
 
     <script>
-        // 🚨 สำคัญมาก: ใส่ Web App URL ของคุณไว้ที่บรรทัดนี้ (อย่าลบเครื่องหมาย " ") 🚨
-        const API_URL = "https://script.google.com/macros/s/AKfycbwU-7S26zOeJIgne2ZnUSyDGCGnNedGSL4PqSRSd4nhkk4Mwfs9dvQ75MG4vMmsTr6Cvw/exec";
+        // 🚨 สำคัญมาก: ใส่ Web App URL ของคุณไว้ที่บรรทัดนี้ 🚨
+        const API_URL = "https://script.google.com/macros/s/AKfycbx4nsmBvUen2XtIwSEK7oo7euddoTW4BFGXyWaG6YFJ_ae-YqhUuoBXKo04A5Fe720GfQ/exec
+";
 
         let currentTab = 'drafts';
         let globalMenus = []; 
@@ -222,16 +228,18 @@
             if(currentTab === 'faq') fetchFaq(); 
         }
 
+        // 🎯 [อัปเกรดความฉลาด Regex] แกะ JSON ได้แม่นยำขึ้นแม้ AI จะพิมพ์แปลกๆ
         function extractOrderData(rawText) {
             let result = { displayText: rawText || "", autoFillItems: [] };
             if (!rawText) return result;
             
-            const jsonRegex = /```json\n([\s\S]*?)\n```/;
+            const jsonRegex = /```json([\s\S]*?)
+```/i; 
             const match = String(rawText).match(jsonRegex);
 
             if (match) {
                 try {
-                    result.autoFillItems = JSON.parse(match[1]); 
+                    result.autoFillItems = JSON.parse(match[1].trim()); 
                     result.displayText = String(rawText).replace(match[0], '').trim(); 
                 } catch (e) { console.error("Parse JSON Error:", e); }
             }
@@ -254,7 +262,7 @@
         }
 
         // =========================================
-        // 🗂️ ดึงออเดอร์มาแสดง (อัปเกรดความฉลาดเช็คออเดอร์)
+        // 🗂️ ดึงออเดอร์มาแสดง (พร้อมระบบ Auto-fill กันตาย 100%)
         // =========================================
         async function fetchOrders() {
             const container = document.getElementById('order-container');
@@ -281,7 +289,6 @@
                     let aiData = extractOrderData(draftOutStr);
                     let cleanDraftText = aiData.displayText.replace(/🚨/g, '').trim();
 
-                    // 🎯 จุดที่แก้ไข: ถ้า AI สร้าง JSON มาให้ หรือลูกค้าพิมพ์คำสั่งซื้อ ให้ถือว่าเป็นออเดอร์ทันที!
                     let isOrder = aiData.autoFillItems.length > 0 || messageInStr.includes('[รูปภาพกระดาษออเดอร์]') || messageInStr.includes('ออเดอร์') || messageInStr.includes('สั่ง') || messageInStr.includes('เอา');
 
                     if (isOrder) {
@@ -313,7 +320,12 @@
                         
                         if (aiData.autoFillItems.length > 0) {
                             aiData.autoFillItems.forEach(item => {
-                                addOrderItem(index, item.loyverseName, item.sweetness, item.qty);
+                                // 🎯 [ระบบกันเหนียว]: ไม่ว่า AI จะคายคีย์ชื่ออะไรออกมา ระบบจะหยิบไปใช้ให้ถูกช่องเสมอ
+                                let menuName = item.loyverseName || item.name || "";
+                                let finalQty = item.qty || item.quantity || 1;
+                                let sweet = item.sweetness || "100%";
+                                
+                                addOrderItem(index, menuName, sweet, finalQty);
                             });
                         } else {
                             addOrderItem(index); 
@@ -349,7 +361,7 @@
             let matchedPrice = 0;
 
             globalMenus.forEach(m => { 
-                let isSelected = (m.loyverseName === defaultLoyverseName) ? 'selected' : '';
+                let isSelected = (m.loyverseName.trim() === defaultLoyverseName.trim()) ? 'selected' : '';
                 if(isSelected) matchedPrice = m.price;
                 menuOptions += `<option value="${m.loyverseName}" data-display="${m.displayName}" data-price="${m.price}" ${isSelected}>${m.displayName}</option>`; 
             });
@@ -358,7 +370,14 @@
                 '200%': 'หวานตัดขา (200%)', '125%': 'เพิ่มหวาน (125%)', '100%': 'หวานปกติ (100%)',
                 '75%': 'หวานน้อย (75%)', '50%': 'หวานกลาง (50%)', '25%': 'หวานน้อยมากๆ (25%)', '0%': 'ไม่หวาน (0%)'
             };
+            
+            // หาคู่ความหวาน ถ้าไม่เจอให้เด้งกลับไปที่ "หวานปกติ (100%)"
             let activeSweetText = sweetMap[defaultSweetness] || sweetMap['100%']; 
+            
+            // ถ้า AI ส่งชื่อแปลกๆมา เช่น "ไม่หวาน (0%)" ตรงๆ ระบบก็จะจับคู่ได้
+            if (Object.values(sweetMap).includes(defaultSweetness)) {
+                activeSweetText = defaultSweetness;
+            }
 
             const getSweetBtn = (pct, label) => {
                 let isActive = (activeSweetText === label) ? 'active' : '';
