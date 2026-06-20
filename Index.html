@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Balenrista AI Engine</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        *, *::before, *::after { box-sizing: border-box !important; margin: 0; padding: 0; }
+        html, body { width: 100%; max-width: 100vw; overflow-x: hidden; background-color: #0A0A0A; }
+        :root { --bg-main: #0A0A0A; --bg-card: #33312F; --col-accent: #B7B4AE; --col-danger: #ff4d4d; --text-muted: #726E68; --text-dark: #0A0A0A; }
+        
+        body { color: var(--col-accent); font-family: 'Prompt', 'Poppins', sans-serif; padding: 24px 20px 100px; display: flex; flex-direction: column; align-items: center; -webkit-tap-highlight-color: transparent; }
+        h1 { color: var(--col-accent); font-family: 'Poppins', 'Prompt', sans-serif; font-weight: 800; text-align: center; font-size: 28px; letter-spacing: -0.05em; margin-bottom: 20px; margin-top: 10px; }
+        h1::after { content: '.'; color: #371E1E; }
+
+        .tab-container { display: flex; gap: 6px; margin-bottom: 24px; width: 100%; max-width: 600px; justify-content: flex-start; background-color: var(--bg-main); overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .tab-container::-webkit-scrollbar { display: none; }
+        .pill-tab { padding: 10px 16px; border-radius: 9999px; font-weight: 700; font-size: 12px; color: var(--text-muted); background-color: var(--bg-card); border: 1px solid #45423E; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 4px; white-space: nowrap; flex-shrink: 0; }
+        .pill-tab.active { background-color: var(--col-accent); color: var(--text-dark); border-color: var(--col-accent); }
+        
+        .tab-content { display: none; width: 100%; max-width: 600px; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .switch-wrapper { display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-card); padding: 16px 20px; border-radius: 20px; border: 1px solid #45423E; width: 100%; box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .switch-label { font-size: 14px; font-weight: 600; color: var(--col-accent); display: flex; align-items: center; gap: 8px;}
+        .switch-mini { padding: 12px 15px; border-radius: 14px; margin-bottom: 8px; box-shadow: none; border-color: #2a2826; }
+
+        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 24px; flex-shrink: 0; }
+        .toggle-switch .toggle-input { display: none; }
+        .toggle-switch .toggle-label { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #212121; border-radius: 34px; cursor: pointer; transition: background-color 0.3s; }
+        .toggle-switch .toggle-label::before { content: ""; position: absolute; width: 20px; height: 20px; border-radius: 50%; top: 2px; left: 2px; background-color: #fff; box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3); transition: transform 0.3s; }
+        .toggle-switch .toggle-input:checked + .toggle-label { background-color: #4CAF50; }
+        .toggle-switch .toggle-input:checked + .toggle-label::before { transform: translateX(16px); }
+
+        .order-card { background-color: var(--bg-card); border-radius: 24px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #45423E; width: 100%; max-width: 100%; overflow: hidden; }
+        .message-box { background-color: var(--bg-main); padding: 16px; border-radius: 16px; margin-bottom: 16px; font-size: 14px; line-height: 1.6; border-left: 4px solid var(--col-accent); word-break: break-word; }
+        .message-box strong { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;}
+        .editable-draft-box { width: 100%; padding: 12px 15px; border-radius: 12px; background-color: var(--bg-main); border: 1px solid #45423E; color: var(--col-accent); font-family: inherit; font-size: 14px; line-height: 1.6; resize: vertical; display: block; margin-top: 5px; font-weight: 500; transition: all 0.3s; }
+        .editable-draft-box:focus { outline: none; border-color: var(--col-accent); }
+        
+        .button-group { display: flex; gap: 12px; margin-top: 20px; }
+        .action-btn { flex: 1; padding: 14px 20px; font-size: 14px; font-weight: 700; border: none; border-radius: 9999px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s ease; }
+        .approve-btn { background-color: var(--col-accent); color: var(--text-dark); border: 1px solid var(--text-muted); }
+        .approve-btn:hover { opacity: 0.9; transform: scale(0.98); }
+        .reject-btn { background-color: #371E1E; color: var(--col-accent); border: 1px solid var(--bg-main); }
+        .reject-btn:hover { background-color: #4a2828; transform: scale(0.98); }
+
+        .refresh-btn { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background-color: var(--bg-card); color: var(--col-accent); font-size: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; z-index: 100; }
+        .refresh-btn:hover { transform: rotate(180deg) scale(1.1); background-color: var(--col-accent); color: var(--text-dark); }
+        #empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); font-weight: 600; display: none; }
+
+        .setting-group { margin-bottom: 15px; width: 100%; max-width: 100%; }
+        .setting-label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .setting-input { width: 100%; padding: 12px 15px; border-radius: 12px; background-color: var(--bg-main); border: 1px solid #45423E; color: var(--col-accent); font-family: inherit; font-size: 14px; display: block; }
+        .setting-input:focus { outline: none; border-color: var(--col-accent); }
+        
+        .row-container { display: table; width: 100%; table-layout: fixed; }
+        .column-cell { display: table-cell; vertical-align: top; }
+        .column-cell:first-child { padding-right: 8px; }
+        .column-cell:last-child { padding-left: 8px; }
+
+        input[type="time"].setting-input { min-height: 45px; -webkit-appearance: none; text-align: center; }
+        
+        .save-btn { width: 100%; background-color: var(--col-accent); color: var(--text-dark); padding: 14px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 14px;}
+        .save-btn:hover { opacity: 0.9; transform: scale(0.98); }
+
+        /* ========================================= */
+        /* 🎨 ส่วนตกแต่งเพิ่มเติมสำหรับ Order Builder */
+        /* ========================================= */
+        .builder-box { background: #2A2826; padding: 15px; border-radius: 12px; border: 1px solid #45423E; margin-bottom: 15px; }
+        .builder-row { display: flex; gap: 8px; align-items: center; background: var(--bg-main); padding: 10px; border-radius: 8px; border: 1px solid #33312F; margin-bottom: 8px; flex-direction: column; align-items: stretch; }
+        .builder-input { width: 100%; padding: 8px; border-radius: 6px; background: #1C1A19; color: var(--col-accent); border: 1px solid #45423E; font-family: inherit; font-size: 13px; }
+        .builder-input:focus { outline: none; border-color: var(--col-accent); }
+        .total-section { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px dashed #45423E; padding-top: 15px; }
+        
+        /* 🍬 ปุ่มเลือกระดับความหวาน 7 ระดับ */
+        .sweet-group { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; justify-content: center; }
+        .sweet-btn { padding: 6px 4px; font-size: 11px; border: 1px solid #45423E; background: #1C1A19; color: var(--text-muted); border-radius: 6px; cursor: pointer; transition: all 0.2s; font-family: inherit; flex: 1 1 calc(14% - 4px); text-align: center; white-space: nowrap; }
+        .sweet-btn:hover { border-color: #726E68; }
+        .sweet-btn.active { background: var(--col-accent); color: var(--text-dark); border-color: var(--col-accent); font-weight: 700; box-shadow: 0 2px 8px rgba(183, 180, 174, 0.3); }
+    </style>
+</head>
+<body>
+
+    <h1>Balenrista Engine</h1>
+
+    <div class="tab-container">
+        <button class="pill-tab active" id="btn-drafts" onclick="switchTab('drafts')"><i class="ph-bold ph-envelope-simple-open"></i> ออเดอร์</button>
+        <button class="pill-tab" id="btn-menu" onclick="switchTab('menu')"><i class="ph-bold ph-coffee"></i> เมนู</button>
+        <button class="pill-tab" id="btn-settings" onclick="switchTab('settings')"><i class="ph-bold ph-storefront"></i> ตั้งค่า</button>
+        <button class="pill-tab" id="btn-faq" onclick="switchTab('faq')"><i class="ph-bold ph-chat-circle-text"></i> FAQ</button>
+        <button class="pill-tab" id="btn-broadcast" onclick="switchTab('broadcast')"><i class="ph-bold ph-megaphone"></i> ประกาศ</button>
+    </div>
+
+    <!-- 🗂️ หน้า 1: ออเดอร์ค้าง -->
+    <div id="tab-drafts" class="tab-content active">
+        <div id="order-container"><p style="text-align: center; color: #726E68;">กำลังโหลดออเดอร์ล่าสุด...</p></div>
+        <div id="empty-state">
+            <i class="ph-fill ph-check-circle" style="font-size: 48px; margin-bottom: 10px; color: #371E1E;"></i>
+            <p>ไม่มีออเดอร์ค้าง เคลียร์ครบแล้ว!</p>
+        </div>
+    </div>
+
+    <!-- 🗂️ หน้า 2: จัดการเมนู -->
+    <div id="tab-menu" class="tab-content">
+        <div class="order-card" id="menu-container" style="padding: 15px;"><p style="text-align: center; color: #726E68;">กำลังโหลดเมนู...</p></div>
+    </div>
+
+    <!-- 🗂️ หน้า 3: ตั้งค่าร้าน -->
+    <div id="tab-settings" class="tab-content">
+        <div class="switch-wrapper">
+            <span class="switch-label"><i class="ph-fill ph-robot"></i> AI ตอบบิลอัตโนมัติ (2 นาที)</span>
+            <div class="toggle-switch">
+              <input class="toggle-input" id="auto-reply-toggle" type="checkbox" checked onchange="toggleAutoReply()">
+              <label class="toggle-label" for="auto-reply-toggle"></label>
+            </div>
+        </div>
+
+        <div class="order-card">
+            <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 16px; border-bottom: 1px solid #45423E; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; color: var(--col-accent);">
+                <i class="ph-bold ph-storefront"></i> เวลาทำการร้าน
+            </h3>
+            
+            <div class="row-container">
+                <div class="column-cell">
+                    <div class="setting-group">
+                        <label class="setting-label">เวลาเปิดร้าน</label>
+                        <input type="time" id="set-open" class="setting-input" value="06:00">
+                    </div>
+                </div>
+                <div class="column-cell">
+                    <div class="setting-group">
+                        <label class="setting-label">เวลาปิดร้าน</label>
+                        <input type="time" id="set-close" class="setting-input" value="13:30">
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">วันหยุดประจำสัปดาห์</label>
+                <select id="set-dayoff" class="setting-input">
+                    <option value="ไม่มี">ไม่มี (เปิดทุกวัน)</option>
+                    <option value="จันทร์" selected>วันจันทร์</option>
+                    <option value="อังคาร">วันอังคาร</option>
+                    <option value="พุธ">วันพุธ</option>
+                    <option value="พฤหัสบดี">วันพฤหัสบดี</option>
+                    <option value="ศุกร์">วันศุกร์</option>
+                    <option value="เสาร์">วันเสาร์</option>
+                    <option value="อาทิตย์">วันอาทิตย์</option>
+                </select>
+            </div>
+            
+            <div class="setting-group"><label class="setting-label">วันหยุดพิเศษ (วว/ดด/ปปปป)</label><input type="text" id="set-holiday" class="setting-input" placeholder="เช่น 13/04/2026"></div>
+            <button class="save-btn" onclick="saveStoreSettings()"><i class="ph-bold ph-floppy-disk"></i> บันทึกการตั้งค่าร้าน</button>
+        </div>
+    </div>
+
+    <!-- 🗂️ หน้า 4: คำถาม FAQ -->
+    <div id="tab-faq" class="tab-content">
+        <div class="order-card">
+            <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #45423E; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; color: var(--col-accent);">
+                <i class="ph-bold ph-chat-circle-text"></i> ข้อมูล & คำถามที่พบบ่อย
+            </h3>
+            <div id="faq-container"><p style="text-align: center; color: #726E68;">กำลังโหลดข้อมูล...</p></div>
+            <button onclick="addFaqRow('', '')" style="background: transparent; color: var(--col-accent); border: 1px dashed #45423E; padding: 12px; border-radius: 12px; width: 100%; margin-bottom: 15px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;"><i class="ph-bold ph-plus"></i> เพิ่มข้อมูล / คำถามใหม่</button>
+            <button class="save-btn" onclick="saveFaq()"><i class="ph-bold ph-floppy-disk"></i> บันทึก FAQ ทั้งหมด</button>
+        </div>
+    </div>
+
+    <!-- 🗂️ หน้า 5: บรอดแคสต์ -->
+    <div id="tab-broadcast" class="tab-content">
+        <div class="order-card">
+            <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #45423E; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; color: var(--col-accent);"><i class="ph-bold ph-megaphone"></i> ส่งข้อความประกาศ</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.5;">ระบบจะส่งข้อความนี้หา <strong>"ลูกค้าทุกคน"</strong> ที่เคยทักแชทร้านเข้ามาครับ</p>
+            
+            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #45423E;">
+                <span style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 10px; font-weight: 600; letter-spacing: 0.5px;">ข้อความด่วน:</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <button onclick="setTemplate('เรียนลูกค้าที่น่ารักทุกท่าน ☕️\n\nพรุ่งนี้ร้าน Balenrista ขออนุญาตปิดให้บริการ 1 วันนะคะ 🛑\n\nแล้วพบกันใหม่วันถัดไปจ้า ✨')" style="background: var(--bg-main); color: var(--col-accent); border: 1px solid #45423E; padding: 6px 14px; border-radius: 99px; font-size: 11px; font-weight: 600; cursor: pointer;">🛑 หยุด 1 วัน</button>
+                    <button onclick="setTemplate('เรียนลูกค้าที่น่ารักทุกท่าน ☕️\n\nร้าน Balenrista ขออนุญาตแจ้งวันหยุดเทศกาล ตั้งแต่วันที่ [เริ่ม] ถึง [สิ้นสุด] นะคะ 🏖️\n\nจะกลับมาเปิดในวันที่ [เปิด] ค่ะ ✨')" style="background: var(--bg-main); color: var(--col-accent); border: 1px solid #45423E; padding: 6px 14px; border-radius: 99px; font-size: 11px; font-weight: 600; cursor: pointer;">🏖️ หยุดยาว</button>
+                    <button onclick="setTemplate('อรุณสวัสดิ์ค่า ☀️\n\nวันนี้ร้าน Balenrista เปิดให้บริการตามปกตินะคะ ☕️✨\n\nรับเมนูอะไรดีคะ แวะมาเติมความสดชื่นกันได้เลยจ้า')" style="background: var(--bg-main); color: var(--col-accent); border: 1px solid #45423E; padding: 6px 14px; border-radius: 99px; font-size: 11px; font-weight: 600; cursor: pointer;">🟢 เปิดร้านปกติ</button>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">ข้อความที่จะส่งให้ลูกค้า</label>
+                <textarea id="broadcast-msg" class="setting-input" rows="6" placeholder="พิมพ์ หรือกดปุ่มข้อความด่วนด้านบน..." style="resize: vertical; line-height: 1.5;"></textarea>
+            </div>
+            <button class="save-btn" onclick="sendBroadcast()" style="background-color: #B7B4AE; color: #0A0A0A; margin-top: 5px;"><i class="ph-bold ph-paper-plane-tilt"></i> ยืนยันส่งบรอดแคสต์</button>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="refreshCurrentTab()"><i class="ph-bold ph-arrows-clockwise"></i></button>
+
+    <script>
+        // 🚨 สำคัญมาก: ใส่ Web App URL ของคุณไว้ที่บรรทัดนี้ (อย่าลบเครื่องหมาย " ") 🚨
+        const API_URL = "https://script.google.com/macros/s/AKfycbywG1_aFoLL0Io-oxm2HgA2L-mfGw76a9no5fr38lqn2XvSStQNy0w04JA6-_Ew1g5H6A/exec";
+
+        let currentTab = 'drafts';
+        let globalMenus = []; 
+
+        // 🛡️ กันเหนียว: โหลดหน้าเว็บทันที ไม่ต้องรอไอคอน (แก้ปัญหาหน้าค้าง)
+        document.addEventListener('DOMContentLoaded', async () => {
+            if(API_URL.includes("ใส่_WEB_APP_URL")) {
+                document.getElementById('order-container').innerHTML = '<p style="text-align: center; color: var(--col-danger);">🚨 ลืมใส่ API_URL ในโค้ดครับ! หน้าเว็บเลยไม่ทำงาน</p>';
+                return;
+            }
+            await preloadMenu();
+            fetchOrders();
+        });
+
+        function switchTab(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll('.pill-tab').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('btn-' + tabName).classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+            refreshCurrentTab();
+        }
+
+        function refreshCurrentTab() {
+            if(currentTab === 'drafts') fetchOrders();
+            if(currentTab === 'menu') fetchMenu();
+            if(currentTab === 'faq') fetchFaq(); 
+        }
+
+        // 🧠 ฟังก์ชันนักสืบ: แอบดึง JSON ออกจากข้อความ AI 
+        function extractOrderData(rawText) {
+            let result = { displayText: rawText || "", autoFillItems: [] };
+            if (!rawText) return result;
+            
+            const jsonRegex = /```json\n([\s\S]*?)\n
+```/;
+            const match = String(rawText).match(jsonRegex);
+
+            if (match) {
+                try {
+                    result.autoFillItems = JSON.parse(match[1]); 
+                    result.displayText = String(rawText).replace(match[0], '').trim(); 
+                } catch (e) { console.error("Parse JSON Error:", e); }
+            }
+            return result;
+        }
+
+        // =========================================
+        // 🛒 โหลดเมนูเข้าสู่ระบบ Dropdown 
+        // =========================================
+        async function preloadMenu() {
+            try {
+                const response = await fetch(API_URL + "?action=get_menu");
+                const menus = await response.json();
+                
+                globalMenus = menus
+                    .filter(m => m[2] && m[5] !== "OFF" && m[5] !== "หมด") 
+                    .map(m => ({ 
+                        displayName: m[1] ? m[1] : m[2], 
+                        loyverseName: m[2],              
+                        price: parseFloat(m[3]) || 0     
+                    }));
+            } catch(e) { console.error("โหลดเมนูไม่สำเร็จ"); }
+        }
+
+        // =========================================
+        // 🗂️ ดึงออเดอร์มาแสดง (พร้อมระบบกันพัง)
+        // =========================================
+        async function fetchOrders() {
+            const container = document.getElementById('order-container');
+            const emptyState = document.getElementById('empty-state');
+            container.innerHTML = '<p style="text-align: center; color: #726E68;">กำลังโหลด...</p>';
+            emptyState.style.display = 'none';
+            
+            try {
+                const response = await fetch(API_URL + "?action=get_drafts");
+                const orders = await response.json();
+                container.innerHTML = "";
+                if (orders.length === 0) { emptyState.style.display = 'block'; return; }
+                
+                orders.forEach((order, index) => {
+                    const card = document.createElement('div');
+                    card.className = "order-card";
+                    
+                    // 🛡️ กันพัง: แปลงข้อความเป็น String เสมอ เผื่อลูกค้าพิมพ์แค่เลขมา
+                    let draftOutStr = String(order.draftOut || "");
+                    let messageInStr = String(order.messageIn || "");
+
+                    let isAlert = draftOutStr.includes('🚨');
+                    let alertBadge = isAlert ? '<div style="color: var(--col-danger); font-size: 13px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 5px;"><i class="ph-fill ph-warning-circle" style="font-size: 16px;"></i> AI ไม่แน่ใจ/อ่านไม่ออก โปรดตรวจสอบ!</div>' : '';
+                    
+                    let aiData = extractOrderData(draftOutStr);
+                    let cleanDraftText = aiData.displayText.replace(/🚨/g, '').trim();
+
+                    let isOrder = messageInStr.includes('[รูปภาพกระดาษออเดอร์]') || messageInStr.includes('ออเดอร์') || messageInStr.includes('สั่ง') || messageInStr.includes('เอา');
+
+                    if (isOrder) {
+                        card.innerHTML = `
+                            <div class="message-box"><strong><i class="ph-fill ph-user"></i> ลูกค้าส่งมา:</strong>${messageInStr}</div>
+                            <div class="message-box" style="margin-bottom: 10px; border-left-color: ${isAlert ? 'var(--col-danger)' : 'var(--col-accent)'}; background-color: ${isAlert ? '#241111' : 'var(--bg-main)'};">
+                                <strong><i class="ph-fill ph-sparkle"></i> ข้อมูลที่ AI แกะลายมือได้ (ใช้อ้างอิง):</strong>
+                                ${alertBadge}
+                                <div class="ai-display-text" style="font-size: 13px; margin-top: 5px; white-space: pre-wrap; color: #9a968f;">${cleanDraftText}</div>
+                            </div>
+
+                            <div class="builder-box">
+                                <strong style="display: block; margin-bottom: 10px; color: var(--col-accent); font-size: 13px;"><i class="ph-bold ph-pencil-simple"></i> สร้างบิลออเดอร์ (ข้อมูลจะนำไปเข้าระบบ POS)</strong>
+                                <div id="order-items-${index}"></div>
+                                <button onclick="addOrderItem(${index})" style="background: transparent; color: var(--col-accent); border: 1px dashed #45423E; padding: 8px; border-radius: 8px; width: 100%; margin-top: 10px; cursor: pointer; font-family: inherit; font-size: 12px; transition: 0.2s;"><i class="ph-bold ph-plus"></i> เพิ่มเมนูเอง</button>
+                                
+                                <div class="total-section">
+                                    <span style="font-size: 14px; font-weight: 600; color: var(--text-muted);">ยอดรวมสุทธิ</span>
+                                    <span style="font-size: 20px; font-weight: 700; color: #4CAF50;"><span id="order-total-${index}">0</span> ฿</span>
+                                </div>
+                            </div>
+
+                            <div class="button-group">
+                                <button class="action-btn approve-btn" onclick="submitOrderBuilder('${order.timestamp}', '${order.userId}', ${index})"><i class="ph-bold ph-check-circle"></i> ยืนยัน & ส่งบิล</button>
+                                <button class="action-btn reject-btn" onclick="processOrder('${order.timestamp}', null, null, 'reject')"><i class="ph-bold ph-trash"></i> ลบทิ้ง</button>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                        
+                        if (aiData.autoFillItems.length > 0) {
+                            aiData.autoFillItems.forEach(item => {
+                                addOrderItem(index, item.loyverseName, item.sweetness, item.qty);
+                            });
+                        } else {
+                            addOrderItem(index); 
+                        }
+                        
+                    } else {
+                        card.innerHTML = `
+                            <div class="message-box"><strong><i class="ph-fill ph-user"></i> ลูกค้าส่งมา:</strong>${messageInStr}</div>
+                            <div class="message-box" style="margin-bottom: 0; border-left-color: ${isAlert ? 'var(--col-danger)' : 'var(--col-accent)'};">
+                                <strong><i class="ph-fill ph-sparkle"></i> AI ร่างคำตอบ (แอดมินแก้ไขได้ ✏️):</strong>
+                                ${alertBadge}
+                                <textarea id="draft-text-${index}" class="editable-draft-box" rows="5" style="${isAlert ? 'border: 2px solid var(--col-danger); background-color: #241111;' : ''}">${cleanDraftText}</textarea>
+                            </div>
+                            <div class="button-group">
+                                <button class="action-btn approve-btn" onclick="const msg = document.getElementById('draft-text-${index}').value; processOrder('${order.timestamp}', '${order.userId}', msg, 'approve')"><i class="ph-bold ph-paper-plane-tilt"></i> ส่งข้อความ</button>
+                                <button class="action-btn reject-btn" onclick="processOrder('${order.timestamp}', null, null, 'reject')"><i class="ph-bold ph-trash"></i> ลบทิ้ง</button>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    }
+                });
+            } catch (error) { 
+                console.error(error); // เพื่อให้แอดมินรู้ว่าพังที่บรรทัดไหน
+                container.innerHTML = `<p style="text-align: center; color: var(--col-danger);">🚨 เกิดข้อผิดพลาดในการรันระบบ Javascript: ${error.message}</p>`; 
+            }
+        }
+
+        function addOrderItem(orderIndex, defaultLoyverseName = '', defaultSweetness = '100%', defaultQty = 1) {
+            const container = document.getElementById(`order-items-${orderIndex}`);
+            const rowId = 'item-' + Date.now() + Math.floor(Math.random() * 1000);
+            
+            let menuOptions = '<option value="">-- เลือกเมนู --</option>';
+            let matchedPrice = 0;
+
+            globalMenus.forEach(m => { 
+                let isSelected = (m.loyverseName === defaultLoyverseName) ? 'selected' : '';
+                if(isSelected) matchedPrice = m.price;
+                menuOptions += `<option value="${m.loyverseName}" data-display="${m.displayName}" data-price="${m.price}" ${isSelected}>${m.displayName}</option>`; 
+            });
+
+            const sweetMap = {
+                '200%': 'หวานตัดขา (200%)', '125%': 'เพิ่มหวาน (125%)', '100%': 'หวานปกติ (100%)',
+                '75%': 'หวานน้อย (75%)', '50%': 'หวานกลาง (50%)', '25%': 'หวานน้อยมากๆ (25%)', '0%': 'ไม่หวาน (0%)'
+            };
+            let activeSweetText = sweetMap[defaultSweetness] || sweetMap['100%']; 
+
+            const getSweetBtn = (pct, label) => {
+                let isActive = (activeSweetText === label) ? 'active' : '';
+                return `<button type="button" class="sweet-btn ${isActive}" onclick="setSweetness(this, '${rowId}', '${label}')">${pct}</button>`;
+            };
+
+            const html = `
+                <div id="${rowId}" class="builder-row" data-unit-price="${matchedPrice}">
+                    <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+                        <div style="flex: 2;">
+                            <select class="menu-select builder-input" onchange="updatePrice('${rowId}', ${orderIndex})">
+                                ${menuOptions}
+                            </select>
+                        </div>
+                        <div style="flex: 0.8;">
+                            <input type="number" class="qty-input builder-input" value="${defaultQty}" min="1" onchange="updateRowTotal('${rowId}', ${orderIndex})" style="text-align: center;">
+                        </div>
+                        <div style="flex: 1; text-align: right; font-size: 14px; font-weight: 700; color: var(--col-accent);">
+                            <span class="row-price">${matchedPrice * defaultQty}</span> ฿
+                        </div>
+                        <button onclick="document.getElementById('${rowId}').remove(); calculateGrandTotal(${orderIndex});" style="background: none; border: none; color: var(--col-danger); cursor: pointer; padding: 4px; font-size: 18px;"><i class="ph-bold ph-x"></i></button>
+                    </div>
+                    
+                    <div class="sweet-group" id="sweet-group-${rowId}" data-value="${activeSweetText}">
+                        ${getSweetBtn('200%', 'หวานตัดขา (200%)')}
+                        ${getSweetBtn('125%', 'เพิ่มหวาน (125%)')}
+                        ${getSweetBtn('100%', 'หวานปกติ (100%)')}
+                        ${getSweetBtn('75%', 'หวานน้อย (75%)')}
+                        ${getSweetBtn('50%', 'หวานกลาง (50%)')}
+                        ${getSweetBtn('25%', 'หวานน้อยมากๆ (25%)')}
+                        ${getSweetBtn('0%', 'ไม่หวาน (0%)')}
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            calculateGrandTotal(orderIndex); 
+        }
+
+        function setSweetness(btnElement, rowId, value) {
+            const group = document.getElementById(`sweet-group-${rowId}`);
+            group.querySelectorAll('.sweet-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+            group.setAttribute('data-value', value);
+        }
+
+        function updatePrice(rowId, orderIndex) {
+            const row = document.getElementById(rowId);
+            const select = row.querySelector('.menu-select');
+            const price = select.options[select.selectedIndex]?.getAttribute('data-price') || 0;
+            row.setAttribute('data-unit-price', price);
+            updateRowTotal(rowId, orderIndex);
+        }
+
+        function updateRowTotal(rowId, orderIndex) {
+            const row = document.getElementById(rowId);
+            const price = parseFloat(row.getAttribute('data-unit-price') || 0);
+            const qty = parseInt(row.querySelector('.qty-input').value || 1);
+            row.querySelector('.row-price').innerText = price * qty;
+            calculateGrandTotal(orderIndex);
+        }
+
+        function calculateGrandTotal(orderIndex) {
+            const container = document.getElementById(`order-items-${orderIndex}`);
+            let grandTotal = 0;
+            container.querySelectorAll('.row-price').forEach(el => grandTotal += parseFloat(el.innerText || 0));
+            document.getElementById(`order-total-${orderIndex}`).innerText = grandTotal;
+        }
+
+        function submitOrderBuilder(timestamp, userId, orderIndex) {
+            const container = document.getElementById(`order-items-${orderIndex}`);
+            const rows = container.querySelectorAll('.builder-row'); 
+            
+            if(rows.length === 0) {
+                const msgBoxText = container.closest('.order-card').querySelector('.ai-display-text').innerText;
+                if(confirm("ไม่มีรายการเมนู ต้องการส่งแค่ข้อความแชทไปหาลูกค้าใช่ไหมครับ?")) {
+                    processOrder(timestamp, userId, msgBoxText, 'approve', ""); 
+                }
+                return;
+            }
+
+            let finalMessage = "แอดมินรับออเดอร์เรียบร้อยค่ะ ✨\nขอสรุปรายการดังนี้นะคะ:\n\n";
+            let grandTotal = 0;
+            let loyversePayload = []; 
+
+            for(let i=0; i<rows.length; i++) {
+                const select = rows[i].querySelector('.menu-select');
+                const loyverseName = select.value;
+                if(!loyverseName) return alert('⚠️ กรุณาเลือกชื่อเมนูให้ครบทุกบรรทัดครับ');
+                
+                const displayName = select.options[select.selectedIndex].getAttribute('data-display');
+                const sweet = rows[i].querySelector('.sweet-group').getAttribute('data-value');
+                const qty = parseInt(rows[i].querySelector('.qty-input').value || 1);
+                const price = parseFloat(rows[i].getAttribute('data-unit-price') || 0);
+                const rowTotal = price * qty;
+                
+                finalMessage += `- ${displayName} (${sweet}) x ${qty} แก้ว = ${rowTotal} บาท\n`;
+                grandTotal += rowTotal;
+
+                loyversePayload.push({ name: loyverseName, sweetness: sweet, quantity: qty, price: price });
+            }
+
+            finalMessage += `\n**ยอดรวมทั้งหมด: ${grandTotal} บาท**\n\nระบบกำลังส่งออเดอร์ไปที่บาร์น้ำ รอรับความสดชื่นได้เลยค่ะ ☕️💖`;
+
+            const jsonString = JSON.stringify(loyversePayload);
+            processOrder(timestamp, userId, finalMessage, 'approve', jsonString); 
+        }
+
+        async function processOrder(timestamp, userId, message, action, jsonData = "") {
+            try {
+                document.body.style.cursor = 'wait';
+                await fetch(API_URL, { 
+                    method: "POST", 
+                    body: JSON.stringify({ action: action, timestamp: timestamp, userId: userId, message: message, jsonData: jsonData }) 
+                });
+                fetchOrders(); 
+            } catch (error) { alert("Error processing request."); } 
+            finally { document.body.style.cursor = 'default'; }
+        }
+
+        async function fetchMenu() {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = '<p style="text-align: center; color: #726E68;">กำลังโหลดข้อมูลเมนู...</p>';
+            try {
+                const response = await fetch(API_URL + "?action=get_menu");
+                const menus = await response.json();
+                container.innerHTML = '<h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #45423E; padding-bottom: 10px; color: var(--col-accent);"><i class="ph-bold ph-coffee"></i> จัดการเปิด-ปิดเมนู</h3>';
+                menus.forEach((menu, index) => {
+                    if(!menu[2]) return;
+                    const menuName = menu[2]; 
+                    const displayName = menu[1] ? menu[1] : menu[2]; 
+                    const isChecked = (menu[5] !== "OFF" && menu[5] !== "หมด") ? "checked" : "";
+                    container.innerHTML += `
+                        <div class="switch-wrapper switch-mini">
+                            <span class="switch-label" style="font-size: 13px; font-weight: 500;">${displayName}</span>
+                            <div class="toggle-switch">
+                                <input class="toggle-input" id="menu-toggle-${index}" type="checkbox" ${isChecked} onchange="toggleMenuStatus('${menuName.replace(/'/g, "\\'")}', this.checked)">
+                                <label class="toggle-label" for="menu-toggle-${index}"></label>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) { container.innerHTML = `<p style="text-align: center; color: var(--col-danger);">เกิดข้อผิดพลาดในการโหลดเมนู</p>`; }
+        }
+
+        async function toggleMenuStatus(menuName, isChecked) {
+            const status = isChecked ? "ON" : "OFF";
+            try { await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "toggle_menu", menuName: menuName, status: status }) }); } 
+            catch(e) { console.error("Failed to update menu status"); }
+        }
+
+        async function toggleAutoReply() {
+            const status = document.getElementById('auto-reply-toggle').checked ? "ON" : "OFF";
+            try { await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "toggle_auto_reply", status: status }) }); } 
+            catch (error) {}
+        }
+
+        async function saveStoreSettings() {
+            try {
+                document.body.style.cursor = 'wait';
+                await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "update_settings",
+                        openTime: document.getElementById('set-open').value,
+                        closeTime: document.getElementById('set-close').value,
+                        closeDay: document.getElementById('set-dayoff').value,
+                        specialHolidays: document.getElementById('set-holiday').value
+                    })
+                });
+                alert("✅ บันทึกเวลาเปิด-ปิดร้านเรียบร้อยแล้ว!");
+            } catch (error) { alert("🚨 เกิดข้อผิดพลาดในการบันทึก"); } 
+            finally { document.body.style.cursor = 'default'; }
+        }
+
+        async function fetchFaq() {
+            const container = document.getElementById('faq-container');
+            container.innerHTML = '<p style="text-align: center; color: #726E68;">กำลังโหลดข้อมูล...</p>';
+            try {
+                const response = await fetch(API_URL + "?action=get_faq");
+                const faqs = await response.json();
+                container.innerHTML = '';
+                if (faqs.length === 0) { addFaqRow('', ''); } 
+                else {
+                    faqs.forEach(faq => { if(faq[0] !== "" || faq[1] !== "") addFaqRow(faq[0], faq[1]); });
+                }
+            } catch(e) { container.innerHTML = '<p style="text-align: center; color: var(--col-danger);">โหลดข้อมูลไม่สำเร็จ</p>'; }
+        }
+
+        function addFaqRow(topic, answer) {
+            const container = document.getElementById('faq-container');
+            const rowId = 'faq-' + Date.now() + Math.floor(Math.random() * 1000);
+            const html = `
+                <div id="${rowId}" style="background: var(--bg-main); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #45423E; position: relative; width: 100%; box-sizing: border-box;">
+                    <button onclick="document.getElementById('${rowId}').remove()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--col-danger); cursor: pointer; padding: 5px; font-size: 18px;">
+                        <i class="ph-bold ph-trash"></i>
+                    </button>
+                    <div class="setting-group" style="margin-bottom: 10px; padding-right: 30px;">
+                        <label class="setting-label">หัวข้อ / คำถาม (Topic)</label>
+                        <input type="text" class="faq-topic setting-input" value="${topic.replace(/"/g, '&quot;')}" placeholder="เช่น Delivery, เวลาปิด">
+                    </div>
+                    <div class="setting-group" style="margin-bottom: 0;">
+                        <label class="setting-label">คำตอบสำหรับ AI (Answer)</label>
+                        <textarea class="faq-answer setting-input" rows="3" placeholder="คำตอบที่ต้องการให้ AI แจ้งลูกค้า..." style="resize: vertical;">${answer.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+                    </div>
+                </div>
+            `;
+            const loadingText = container.querySelector('p');
+            if(loadingText) loadingText.remove();
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        async function saveFaq() {
+            const topics = document.querySelectorAll('.faq-topic');
+            const answers = document.querySelectorAll('.faq-answer');
+            let faqData = [];
+            for(let i = 0; i < topics.length; i++) {
+                const t = topics[i].value.trim();
+                const a = answers[i].value.trim();
+                if(t || a) faqData.push([t, a]);
+            }
+            if(faqData.length === 0) faqData = [["", ""]];
+            try {
+                document.body.style.cursor = 'wait';
+                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "update_faq", faqData: faqData }) });
+                alert("✅ บันทึก FAQ เรียบร้อยแล้ว! สมอง AI อัปเดตข้อมูลแล้วครับ");
+            } catch(e) { alert("🚨 เกิดข้อผิดพลาดในการบันทึก"); } 
+            finally { document.body.style.cursor = 'default'; }
+        }
+
+        function setTemplate(text) { document.getElementById('broadcast-msg').value = text; }
+
+        async function sendBroadcast() {
+            const msg = document.getElementById('broadcast-msg').value.trim();
+            if (!msg) return alert("⚠️ กรุณาพิมพ์ข้อความที่ต้องการส่งก่อนครับ");
+            if (!confirm("คุณแน่ใจหรือไม่ว่าจะส่งข้อความนี้หาลูกค้าทุกคน?")) return;
+            try {
+                document.body.style.cursor = 'wait';
+                const response = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "broadcast_message", message: msg }) });
+                const result = await response.json();
+                if (result.status === "success") {
+                    alert(`✅ ส่งข้อความสำเร็จ! เข้าถึงลูกค้าทั้งหมด ${result.count} คน`);
+                    document.getElementById('broadcast-msg').value = ''; 
+                } else { alert("🚨 เกิดข้อผิดพลาดในการส่ง"); }
+            } catch (error) { alert("🚨 เกิดข้อผิดพลาดในการเชื่อมต่อ"); } 
+            finally { document.body.style.cursor = 'default'; }
+        }
+    </script>
+</body>
+</html>
