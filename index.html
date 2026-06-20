@@ -96,7 +96,6 @@
         <button class="pill-tab" id="btn-broadcast" onclick="switchTab('broadcast')"><i class="ph-bold ph-megaphone"></i> ประกาศ</button>
     </div>
 
-    <!-- 🗂️ หน้า 1: ออเดอร์ค้าง -->
     <div id="tab-drafts" class="tab-content active">
         <div id="order-container"><p style="text-align: center; color: #726E68;">กำลังโหลดออเดอร์ล่าสุด...</p></div>
         <div id="empty-state">
@@ -105,12 +104,10 @@
         </div>
     </div>
 
-    <!-- 🗂️ หน้า 2: จัดการเมนู -->
     <div id="tab-menu" class="tab-content">
         <div class="order-card" id="menu-container" style="padding: 15px;"><p style="text-align: center; color: #726E68;">กำลังโหลดเมนู...</p></div>
     </div>
 
-    <!-- 🗂️ หน้า 3: ตั้งค่าร้าน -->
     <div id="tab-settings" class="tab-content">
         <div class="switch-wrapper">
             <span class="switch-label"><i class="ph-fill ph-robot"></i> AI ตอบบิลอัตโนมัติ (2 นาที)</span>
@@ -159,7 +156,6 @@
         </div>
     </div>
 
-    <!-- 🗂️ หน้า 4: คำถาม FAQ -->
     <div id="tab-faq" class="tab-content">
         <div class="order-card">
             <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #45423E; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; color: var(--col-accent);">
@@ -171,7 +167,6 @@
         </div>
     </div>
 
-    <!-- 🗂️ หน้า 5: บรอดแคสต์ -->
     <div id="tab-broadcast" class="tab-content">
         <div class="order-card">
             <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #45423E; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; color: var(--col-accent);"><i class="ph-bold ph-megaphone"></i> ส่งข้อความประกาศ</h3>
@@ -203,7 +198,6 @@
         let currentTab = 'drafts';
         let globalMenus = []; 
 
-        // 🛡️ กันเหนียว: โหลดหน้าเว็บทันที ไม่ต้องรอไอคอน (แก้ปัญหาหน้าค้าง)
         document.addEventListener('DOMContentLoaded', async () => {
             if(API_URL.includes("ใส่_WEB_APP_URL")) {
                 document.getElementById('order-container').innerHTML = '<p style="text-align: center; color: var(--col-danger);">🚨 ลืมใส่ API_URL ในโค้ดครับ! หน้าเว็บเลยไม่ทำงาน</p>';
@@ -228,7 +222,6 @@
             if(currentTab === 'faq') fetchFaq(); 
         }
 
-        // 🧠 ฟังก์ชันนักสืบ: แอบดึง JSON ออกจากข้อความ AI 
         function extractOrderData(rawText) {
             let result = { displayText: rawText || "", autoFillItems: [] };
             if (!rawText) return result;
@@ -245,9 +238,6 @@
             return result;
         }
 
-        // =========================================
-        // 🛒 โหลดเมนูเข้าสู่ระบบ Dropdown 
-        // =========================================
         async function preloadMenu() {
             try {
                 const response = await fetch(API_URL + "?action=get_menu");
@@ -264,7 +254,7 @@
         }
 
         // =========================================
-        // 🗂️ ดึงออเดอร์มาแสดง (พร้อมระบบกันพัง)
+        // 🗂️ ดึงออเดอร์มาแสดง (อัปเกรดความฉลาดเช็คออเดอร์)
         // =========================================
         async function fetchOrders() {
             const container = document.getElementById('order-container');
@@ -282,7 +272,6 @@
                     const card = document.createElement('div');
                     card.className = "order-card";
                     
-                    // 🛡️ กันพัง: แปลงข้อความเป็น String เสมอ เผื่อลูกค้าพิมพ์แค่เลขมา
                     let draftOutStr = String(order.draftOut || "");
                     let messageInStr = String(order.messageIn || "");
 
@@ -292,13 +281,14 @@
                     let aiData = extractOrderData(draftOutStr);
                     let cleanDraftText = aiData.displayText.replace(/🚨/g, '').trim();
 
-                    let isOrder = messageInStr.includes('[รูปภาพกระดาษออเดอร์]') || messageInStr.includes('ออเดอร์') || messageInStr.includes('สั่ง') || messageInStr.includes('เอา');
+                    // 🎯 จุดที่แก้ไข: ถ้า AI สร้าง JSON มาให้ หรือลูกค้าพิมพ์คำสั่งซื้อ ให้ถือว่าเป็นออเดอร์ทันที!
+                    let isOrder = aiData.autoFillItems.length > 0 || messageInStr.includes('[รูปภาพกระดาษออเดอร์]') || messageInStr.includes('ออเดอร์') || messageInStr.includes('สั่ง') || messageInStr.includes('เอา');
 
                     if (isOrder) {
                         card.innerHTML = `
                             <div class="message-box"><strong><i class="ph-fill ph-user"></i> ลูกค้าส่งมา:</strong>${messageInStr}</div>
                             <div class="message-box" style="margin-bottom: 10px; border-left-color: ${isAlert ? 'var(--col-danger)' : 'var(--col-accent)'}; background-color: ${isAlert ? '#241111' : 'var(--bg-main)'};">
-                                <strong><i class="ph-fill ph-sparkle"></i> ข้อมูลที่ AI แกะลายมือได้ (ใช้อ้างอิง):</strong>
+                                <strong><i class="ph-fill ph-sparkle"></i> ข้อมูลที่ AI วิเคราะห์ได้ (ใช้อ้างอิง):</strong>
                                 ${alertBadge}
                                 <div class="ai-display-text" style="font-size: 13px; margin-top: 5px; white-space: pre-wrap; color: #9a968f;">${cleanDraftText}</div>
                             </div>
@@ -346,7 +336,7 @@
                     }
                 });
             } catch (error) { 
-                console.error(error); // เพื่อให้แอดมินรู้ว่าพังที่บรรทัดไหน
+                console.error(error); 
                 container.innerHTML = `<p style="text-align: center; color: var(--col-danger);">🚨 เกิดข้อผิดพลาดในการรันระบบ Javascript: ${error.message}</p>`; 
             }
         }
