@@ -233,8 +233,7 @@
             let result = { displayText: rawText || "", autoFillItems: [] };
             if (!rawText) return result;
             
-            const jsonRegex = /```json\n([\s\S]*?)\n
-```/;
+            const jsonRegex = /```json\n([\s\S]*?)\n```/;
             const match = String(rawText).match(jsonRegex);
 
             if (match) {
