@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Balenrista AI Engine</title>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="[https://unpkg.com/@phosphor-icons/web](https://unpkg.com/@phosphor-icons/web)"></script>
+    <link href="[https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap](https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap)" rel="stylesheet">
     
     <style>
         *, *::before, *::after { box-sizing: border-box !important; margin: 0; padding: 0; }
@@ -96,7 +96,6 @@
         <button class="pill-tab" id="btn-broadcast" onclick="switchTab('broadcast')"><i class="ph-bold ph-megaphone"></i> ประกาศ</button>
     </div>
 
-    <!-- 🗂️ หน้า 1: ออเดอร์ค้าง -->
     <div id="tab-drafts" class="tab-content active">
         <div id="order-container"><p style="text-align: center; color: #726E68;">กำลังโหลดออเดอร์ล่าสุด...</p></div>
         <div id="empty-state">
@@ -105,12 +104,10 @@
         </div>
     </div>
 
-    <!-- 🗂️ หน้า 2: จัดการเมนู -->
     <div id="tab-menu" class="tab-content">
         <div class="order-card" id="menu-container" style="padding: 15px;"><p style="text-align: center; color: #726E68;">กำลังโหลดเมนู...</p></div>
     </div>
 
-    <!-- 🗂️ หน้า 3: ตั้งค่าร้าน -->
     <div id="tab-settings" class="tab-content">
         <div class="switch-wrapper">
             <span class="switch-label"><i class="ph-fill ph-robot"></i> AI ตอบบิลอัตโนมัติ (2 นาที)</span>
@@ -159,7 +156,6 @@
         </div>
     </div>
 
-    <!-- 🗂️ หน้า 4: คำถาม FAQ -->
     <div id="tab-faq" class="tab-content">
         <div class="order-card">
             <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #45423E; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; color: var(--col-accent);">
@@ -171,7 +167,6 @@
         </div>
     </div>
 
-    <!-- 🗂️ หน้า 5: บรอดแคสต์ -->
     <div id="tab-broadcast" class="tab-content">
         <div class="order-card">
             <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #45423E; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; color: var(--col-accent);"><i class="ph-bold ph-megaphone"></i> ส่งข้อความประกาศ</h3>
@@ -198,7 +193,7 @@
 
     <script>
         // 🚨 สำคัญมาก: ใส่ Web App URL ของคุณไว้ที่บรรทัดนี้ 🚨
-        const API_URL = "https://script.google.com/macros/s/AKfycbx4nsmBvUen2XtIwSEK7oo7euddoTW4BFGXyWaG6YFJ_ae-YqhUuoBXKo04A5Fe720GfQ/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbySYOc65qJdBC9FsjQQZSd2S1btSowd0DQ7cSTIIwkia0kWHyJ4PReCwOyXhIWYSMjQBw/exec";
 
         let currentTab = 'drafts';
         let globalMenus = []; 
@@ -227,20 +222,24 @@
             if(currentTab === 'faq') fetchFaq(); 
         }
 
-        // 🎯 [อัปเกรดความฉลาด Regex] แกะ JSON ได้แม่นยำขึ้นแม้ AI จะพิมพ์แปลกๆ
+        // 🎯 [บลูเล็ตพรูฟ 100%] แกะก้อน JSON โดยไม่ใช้ Regex เลย เพื่อป้องกัน Syntax Error พังทั้งระบบ
         function extractOrderData(rawText) {
             let result = { displayText: rawText || "", autoFillItems: [] };
             if (!rawText) return result;
             
-            const jsonRegex = /```json([\s\S]*?)
-```/i; 
-            const match = String(rawText).match(jsonRegex);
+            let str = String(rawText);
+            let lowerStr = str.toLowerCase();
+            let startIdx = lowerStr.indexOf('```json');
 
-            if (match) {
-                try {
-                    result.autoFillItems = JSON.parse(match[1].trim()); 
-                    result.displayText = String(rawText).replace(match[0], '').trim(); 
-                } catch (e) { console.error("Parse JSON Error:", e); }
+            if (startIdx !== -1) {
+                let endIdx = str.indexOf('```', startIdx + 7);
+                if (endIdx !== -1) {
+                    let jsonText = str.substring(startIdx + 7, endIdx).trim();
+                    try {
+                        result.autoFillItems = JSON.parse(jsonText);
+                        result.displayText = str.split(str.substring(startIdx, endIdx + 3)).join('').trim();
+                    } catch (e) { console.error("Parse JSON Error:", e); }
+                }
             }
             return result;
         }
@@ -260,9 +259,6 @@
             } catch(e) { console.error("โหลดเมนูไม่สำเร็จ"); }
         }
 
-        // =========================================
-        // 🗂️ ดึงออเดอร์มาแสดง (พร้อมระบบ Auto-fill กันตาย 100%)
-        // =========================================
         async function fetchOrders() {
             const container = document.getElementById('order-container');
             const emptyState = document.getElementById('empty-state');
@@ -286,7 +282,8 @@
                     let alertBadge = isAlert ? '<div style="color: var(--col-danger); font-size: 13px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 5px;"><i class="ph-fill ph-warning-circle" style="font-size: 16px;"></i> AI ไม่แน่ใจ/อ่านไม่ออก โปรดตรวจสอบ!</div>' : '';
                     
                     let aiData = extractOrderData(draftOutStr);
-                    let cleanDraftText = aiData.displayText.replace(/🚨/g, '').trim();
+                    // ใช้ split.join แทน replace ป้องกัน Regex Error
+                    let cleanDraftText = aiData.displayText.split('🚨').join('').trim();
 
                     let isOrder = aiData.autoFillItems.length > 0 || messageInStr.includes('[รูปภาพกระดาษออเดอร์]') || messageInStr.includes('ออเดอร์') || messageInStr.includes('สั่ง') || messageInStr.includes('เอา');
 
@@ -319,7 +316,6 @@
                         
                         if (aiData.autoFillItems.length > 0) {
                             aiData.autoFillItems.forEach(item => {
-                                // 🎯 [ระบบกันเหนียว]: ไม่ว่า AI จะคายคีย์ชื่ออะไรออกมา ระบบจะหยิบไปใช้ให้ถูกช่องเสมอ
                                 let menuName = item.loyverseName || item.name || "";
                                 let finalQty = item.qty || item.quantity || 1;
                                 let sweet = item.sweetness || "100%";
@@ -370,13 +366,8 @@
                 '75%': 'หวานน้อย (75%)', '50%': 'หวานกลาง (50%)', '25%': 'หวานน้อยมากๆ (25%)', '0%': 'ไม่หวาน (0%)'
             };
             
-            // หาคู่ความหวาน ถ้าไม่เจอให้เด้งกลับไปที่ "หวานปกติ (100%)"
             let activeSweetText = sweetMap[defaultSweetness] || sweetMap['100%']; 
-            
-            // ถ้า AI ส่งชื่อแปลกๆมา เช่น "ไม่หวาน (0%)" ตรงๆ ระบบก็จะจับคู่ได้
-            if (Object.values(sweetMap).includes(defaultSweetness)) {
-                activeSweetText = defaultSweetness;
-            }
+            if (Object.values(sweetMap).includes(defaultSweetness)) { activeSweetText = defaultSweetness; }
 
             const getSweetBtn = (pct, label) => {
                 let isActive = (activeSweetText === label) ? 'active' : '';
@@ -508,11 +499,14 @@
                     const menuName = menu[2]; 
                     const displayName = menu[1] ? menu[1] : menu[2]; 
                     const isChecked = (menu[5] !== "OFF" && menu[5] !== "หมด") ? "checked" : "";
+                    
+                    let safeMenuName = menuName.split("'").join("\\'");
+
                     container.innerHTML += `
                         <div class="switch-wrapper switch-mini">
                             <span class="switch-label" style="font-size: 13px; font-weight: 500;">${displayName}</span>
                             <div class="toggle-switch">
-                                <input class="toggle-input" id="menu-toggle-${index}" type="checkbox" ${isChecked} onchange="toggleMenuStatus('${menuName.replace(/'/g, "\\'")}', this.checked)">
+                                <input class="toggle-input" id="menu-toggle-${index}" type="checkbox" ${isChecked} onchange="toggleMenuStatus('${safeMenuName}', this.checked)">
                                 <label class="toggle-label" for="menu-toggle-${index}"></label>
                             </div>
                         </div>
@@ -568,6 +562,10 @@
         function addFaqRow(topic, answer) {
             const container = document.getElementById('faq-container');
             const rowId = 'faq-' + Date.now() + Math.floor(Math.random() * 1000);
+            
+            let safeTopic = topic.split('"').join('&quot;');
+            let safeAnswer = answer.split('<').join('&lt;').split('>').join('&gt;');
+
             const html = `
                 <div id="${rowId}" style="background: var(--bg-main); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #45423E; position: relative; width: 100%; box-sizing: border-box;">
                     <button onclick="document.getElementById('${rowId}').remove()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--col-danger); cursor: pointer; padding: 5px; font-size: 18px;">
@@ -575,11 +573,11 @@
                     </button>
                     <div class="setting-group" style="margin-bottom: 10px; padding-right: 30px;">
                         <label class="setting-label">หัวข้อ / คำถาม (Topic)</label>
-                        <input type="text" class="faq-topic setting-input" value="${topic.replace(/"/g, '&quot;')}" placeholder="เช่น Delivery, เวลาปิด">
+                        <input type="text" class="faq-topic setting-input" value="${safeTopic}" placeholder="เช่น Delivery, เวลาปิด">
                     </div>
                     <div class="setting-group" style="margin-bottom: 0;">
                         <label class="setting-label">คำตอบสำหรับ AI (Answer)</label>
-                        <textarea class="faq-answer setting-input" rows="3" placeholder="คำตอบที่ต้องการให้ AI แจ้งลูกค้า..." style="resize: vertical;">${answer.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+                        <textarea class="faq-answer setting-input" rows="3" placeholder="คำตอบที่ต้องการให้ AI แจ้งลูกค้า..." style="resize: vertical;">${safeAnswer}</textarea>
                     </div>
                 </div>
             `;
