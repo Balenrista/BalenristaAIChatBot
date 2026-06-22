@@ -416,7 +416,8 @@
       menus.forEach(menu => {
         const card = document.createElement('div');
         card.className = 'menu-card';
-        const imgUrl = item.image || `./${encodeURIComponent(item.loyverseName)}.png`;
+        // แก้ไขให้เรียกตัวแปร menu ให้ถูกต้อง 100% แล้วครับบอส
+        const imgUrl = menu.image || `./${encodeURIComponent(menu.loyverseName)}.png`;
 
         card.innerHTML = `
           <div class="menu-img-wrapper">
