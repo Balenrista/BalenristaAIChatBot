@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Balenrista - Order Online</title>
+  
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg-main: #0A0A0A;       /* สีพื้นหลังหลักของแอดมิน */
+      --bg-card: #33312F;       /* สีกล่องการ์ดแอดมิน */
+      --col-accent: #B7B4AE;    /* สีครีมเอกลักษณ์ของร้าน */
+      --col-danger: #ff4d4d;
+      --text-muted: #726E68;
+      --text-dark: #0A0A0A;
+      --border-color: #45423E;
+      --border-radius-btn: 8px;
+      --border-radius-card: 16px;
+    }
+
+    html, body { 
+      width: 100%; 
+      max-width: 100vw; 
+      overflow-x: hidden; 
+      background-color: var(--bg-main); 
+      color: var(--col-accent);
+      font-family: 'Prompt', sans-serif;
+      padding-bottom: 100px;
+    }
+    
+    /* Header */
+    .header { 
+      background: var(--bg-card); 
+      color: var(--col-accent); 
+      padding: 16px 20px; 
+      font-size: 18px; 
+      font-weight: 600; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      position: sticky; 
+      top: 0; 
+      z-index: 100; 
+      border-bottom: 1px solid var(--border-color); 
+    }
+    
+    .container { padding: 16px; width: 100%; max-width: 600px; margin: 0 auto; }
+    
+    /* Banner แจ้งเตือน */
+    .alert-banner { 
+      background-color: #241111; 
+      color: var(--col-danger); 
+      padding: 12px 16px; 
+      border-radius: var(--border-radius-btn); 
+      font-size: 13px; 
+      font-weight: 600; 
+      margin-bottom: 16px; 
+      text-align: center; 
+      border: 1px solid var(--border-color); 
+    }
+    
+    /* แถบหมวดหมู่แบบเลื่อนขวาง */
+    .category-scroll { 
+      display: flex; 
+      overflow-x: auto; 
+      gap: 8px; 
+      padding-bottom: 12px; 
+      margin-bottom: 16px; 
+      scrollbar-width: none; 
+    }
+    .category-scroll::-webkit-scrollbar { display: none; }
+    
+    .cat-tab { 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-color); 
+      padding: 8px 16px; 
+      border-radius: 9999px; 
+      font-size: 13px; 
+      font-weight: 600; 
+      color: var(--text-muted); 
+      white-space: nowrap; 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+    }
+    .cat-tab.active { 
+      background: var(--col-accent); 
+      color: var(--text-dark); 
+      border-color: var(--col-accent); 
+    }
+    
+    /* รายการเมนูกริด 2 คอลัมน์ */
+    .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .menu-card { 
+      background: var(--bg-card); 
+      border-radius: var(--border-radius-card); 
+      padding: 12px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+      display: flex; 
+      flex-direction: column; 
+      position: relative; 
+      border: 1px solid var(--border-color); 
+    }
+    .menu-img-wrapper { 
+      position: relative; 
+      width: 100%; 
+      aspect-ratio: 1; 
+      border-radius: var(--border-radius-btn); 
+      background: var(--bg-main); 
+      overflow: hidden; 
+      margin-bottom: 10px; 
+      border: 1px solid var(--border-color); 
+    }
+    .menu-img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .menu-info { flex-grow: 1; display: flex; flex-direction: column; }
+    .menu-title { font-size: 14px; font-weight: 600; line-height: 1.4; margin-bottom: 4px; color: var(--col-accent); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .menu-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1; }
+    
+    /* แถวด้านล่างการ์ด ราคา + ปุ่มบวก */
+    .card-action-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+    .card-price { font-size: 15px; font-weight: 700; color: #4CAF50; }
+    .add-icon-btn { 
+      background: var(--col-accent); 
+      color: var(--text-dark); 
+      border: none; 
+      width: 30px; 
+      height: 30px; 
+      border-radius: 6px; 
+      font-size: 20px; 
+      font-weight: 500; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      cursor: pointer; 
+      transition: 0.15s; 
+    }
+    .add-icon-btn:active { transform: scale(0.92); opacity: 0.8; }
+    
+    /* แถบควบคุมตะกร้าสินค้าด้านล่างสุด */
+    .cart-bar { 
+      position: fixed; 
+      bottom: 0; 
+      left: 0; 
+      right: 0; 
+      background: var(--bg-card); 
+      padding: 16px 20px; 
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.5); 
+      z-index: 999; 
+      display: flex; 
+      justify-content: center; 
+      border-top: 1px solid var(--border-color); 
+    }
+    .confirm-btn { 
+      width: 100%; 
+      max-width: 560px; 
+      border: none; 
+      padding: 14px; 
+      border-radius: var(--border-radius-btn); 
+      font-family: 'Prompt', sans-serif; 
+      font-size: 15px; 
+      font-weight: 700; 
+      color: var(--text-dark); 
+      background-color: var(--col-accent); 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+      text-align: center; 
+    }
+
+    /* โครงสร้างป๊อปอัพสไลด์ขึ้น (Bottom Sheet) */
+    .sheet-overlay { position: fixed; top: 0; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; }
+    .bottom-sheet { 
+      position: fixed; 
+      bottom: 0; 
+      left: 0; 
+      right: 0; 
+      background: var(--bg-card); 
+      border-top-left-radius: 20px; 
+      border-top-right-radius: 20px; 
+      max-height: 85vh; 
+      z-index: 1001; 
+      display: flex; 
+      flex-direction: column; 
+      transform: translateY(100%); 
+      transition: transform 0.3s ease-out; 
+      border-top: 1px solid var(--border-color); 
+    }
+    .sheet-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #2A2826; border-top-left-radius: 20px; border-top-right-radius: 20px; }
+    .sheet-title { font-size: 15px; font-weight: 700; color: var(--col-accent); }
+    .close-sheet { background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; }
+    .sheet-content { padding: 20px; overflow-y: auto; flex-grow: 1; background-color: var(--bg-main); }
+    
+    /* สไตล์กลุ่มตัวเลือกภายในป๊อปอัพ */
+    .option-group-title { font-size: 13px; font-weight: 700; margin-top: 12px; margin-bottom: 12px; color: var(--col-accent); display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .option-group-title span.required { color: var(--col-danger); font-size: 11px; font-weight: 400; }
+    .option-selector-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+    
+    .opt-btn { 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-color); 
+      padding: 12px; 
+      border-radius: var(--border-radius-btn); 
+      font-family: 'Prompt', sans-serif; 
+      font-size: 12px; 
+      text-align: center; 
+      cursor: pointer; 
+      transition: 0.15s; 
+      color: var(--col-accent); 
+      font-weight: 500;
+    }
+    .opt-btn.active { 
+      background: var(--col-accent); 
+      color: var(--text-dark); 
+      border-color: var(--col-accent); 
+      font-weight: 700; 
+    }
+    
+    /* โครงสร้างรายการภายในตะกร้า */
+    .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-color); }
+    .cart-item-name { font-size: 14px; font-weight: 600; color: var(--col-accent); }
+    .cart-item-details { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; }
+    
+    .quantity-control { display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border-color); border-radius: var(--border-radius-btn); overflow: hidden; width: 100px; height: 34px; background: var(--bg-card); }
+    .qty-btn { background: #2A2826; border: none; color: var(--col-accent); width: 34px; height: 100%; font-size: 16px; font-weight: 500; cursor: pointer; }
+    .qty-num { font-size: 13px; font-weight: 700; width: 32px; text-align: center; color: var(--col-accent); }
+    
+    .sheet-footer { padding: 16px 20px; border-top: 1px solid var(--border-color); background: var(--bg-card); }
+    .summary-row { display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--col-accent); }
+
+    #loading { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <span>Balenrista Order Online</span>
+    <span id="headerCartCount" style="font-size: 14px; font-weight: 500;">ตะกร้า (0)</span>
+  </div>
+
+  <div class="container">
+    <div class="alert-banner" id="alertBanner" style="display: none;">
+      เงื่อนไขบริการ: กรุณาสั่งซื้อเครื่องดื่ม 4 แก้วขึ้นไป
+    </div>
+
+    <div id="loading">กำลังเตรียมข้อมูลเมนู...</div>
+    <div class="category-scroll" id="categoryScroll" style="display: none;"></div>
+    <div class="menu-grid" id="menuGrid" style="display: none;"></div>
+  </div>
+
+  <div class="cart-bar" id="cartBar" style="display: none;">
+    <button class="confirm-btn" id="confirmBtn" disabled>กำลังตรวจสอบสถานะร้าน...</button>
+  </div>
+
+  <div class="sheet-overlay" id="optionsOverlay" onclick="closeOptionsSheet()"></div>
+  <div class="bottom-sheet" id="optionsSheet">
+    <div class="sheet-header">
+      <div class="sheet-title" id="optionsModalTitle">ตัวเลือกเครื่องดื่ม</div>
+      <button class="close-sheet" onclick="closeOptionsSheet()">✕</button>
+    </div>
+    <div class="sheet-content">
+      
+      <div class="option-group-title">ระดับความหวาน <span class="required">* บังคับเลือก</span></div>
+      <div class="option-selector-grid" id="sweetnessGrid">
+        <button class="opt-btn" onclick="selectOption('sweetness', this, 'หวานตัดขา (200%)', 0)">หวานตัดขา (200%)</button>
+        <button class="opt-btn" onclick="selectOption('sweetness', this, 'เพิ่มหวาน (125%)', 0)">เพิ่มหวาน (125%)</button>
+        <button class="opt-btn active" onclick="selectOption('sweetness', this, 'หวานปกติ (100%)', 0)">หวานปกติ (100%)</button>
+        <button class="opt-btn" onclick="selectOption('sweetness', this, 'หวานน้อย (75%)', 0)">หวานน้อย (75%)</button>
+        <button class="opt-btn" onclick="selectOption('sweetness', this, 'หวานกลาง (50%)', 0)">หวานกลาง (50%)</button>
+        <button class="opt-btn" onclick="selectOption('sweetness', this, 'หวานน้อยมากๆ (25%)', 0)">หวานน้อยมากๆ (25%)</button>
+        <button class="opt-btn" onclick="selectOption('sweetness', this, 'หวานจุ๊บจิ๊บ (10%)', 0)">หวานจุ๊บจิ๊บ (10%)</button>
+        <button class="opt-btn" onclick="selectOption('sweetness', this, 'ไม่หวาน (0%)', 0)">ไม่หวาน (0%)</button>
+      </div>
+
+      <div id="topLayerSection" style="display: none;">
+        <div class="option-group-title">Top Layer ซอสราดด้านบน <span style="color:var(--text-muted); font-weight:400;">(เลือกได้ 1 อย่าง)</span></div>
+        <div class="option-selector-grid" id="topLayerGrid">
+          <button class="opt-btn" onclick="selectOption('topLayer', this, 'Coco', 0)">Coco</button>
+          <button class="opt-btn" onclick="selectOption('topLayer', this, 'Green Tea', 0)">Green Tea</button>
+          <button class="opt-btn" onclick="selectOption('topLayer', this, 'Thai Tea', 0)">Thai Tea</button>
+          <button class="opt-btn" onclick="selectOption('topLayer', this, 'Matcha', 10)">Matcha (+10฿)</button> 
+        </div>
+      </div>
+
+      <div id="deliciousSection" style="display: none;">
+        <div class="option-group-title">เพิ่มความอร่อย <span style="color:var(--text-muted); font-weight:400;">(เลือกได้ 1 อย่าง)</span></div>
+        <div class="option-selector-grid" id="deliciousGrid">
+          <button class="opt-btn" onclick="selectOption('delicious', this, 'Chocolate', 10)">Chocolate (+10฿)</button>
+          <button class="opt-btn" onclick="selectOption('delicious', this, 'Cocoflower (น้ำช่อดอกมะพร้าว)', 10)">น้ำช่อดอกมะพร้าว (+10฿)</button>
+          <button class="opt-btn" onclick="selectOption('delicious', this, 'Orange', 10)">Orange (+10฿)</button>
+          <button class="opt-btn" onclick="selectOption('delicious', this, 'Milk', 10)">Milk (+10฿)</button>
+          <button class="opt-btn" onclick="selectOption('delicious', this, 'Coffee', 10)">Coffee (+10฿)</button>
+        </div>
+      </div>
+
+      <div id="icePackSection" style="display: none;">
+        <div class="option-group-title">การบรรจุน้ำแข็ง</div>
+        <div class="option-selector-grid" id="icePackGrid">
+          <button class="opt-btn active" onclick="selectOption('icePack', this, 'ไม่แยกน้ำแข็ง', 0)">ไม่แยกน้ำแข็ง</button>
+          <button class="opt-btn" onclick="selectOption('icePack', this, 'แยกน้ำแข็ง', 0)">แยกน้ำแข็ง</button>
+        </div>
+      </div>
+
+    </div>
+    <div class="sheet-footer">
+      <button class="confirm-btn" id="addCartBtn" onclick="confirmAddToCart()">ใส่ตะกร้า</button>
+    </div>
+  </div>
+
+  <div class="sheet-overlay" id="cartOverlay" onclick="closeCartSheet()"></div>
+  <div class="bottom-sheet" id="cartSheet">
+    <div class="sheet-header">
+      <div class="sheet-title">รายการในตะกร้า</div>
+      <button class="close-sheet" onclick="closeCartSheet()">✕</button>
+    </div>
+    <div class="cart-items-list sheet-content" id="cartItemsList"></div>
+    <div class="sheet-footer">
+      <div class="summary-row">
+        <span>ยอดรวมทั้งสิ้น</span>
+        <span id="cartTotalPrice" style="color:#4CAF50;">฿0</span>
+      </div>
+      <button class="confirm-btn" id="sheetConfirmBtn" disabled>ยืนยันคำสั่งซื้อ</button>
+    </div>
+  </div>
+
+  <script>
+    // ⚠️ นำลิงก์ Web App URL จากสมองหลังบ้าน Apps Script ของบอสมาแปะที่นี่
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxX8lFnUZ172RGgNkhHnDU-1tmqIBfNOBXS1kiI8sR9WsJ9C5aMzQXbTfzZ6Z77oni1zg/exec"; 
+
+    let allMenus = []; 
+    let cart = []; 
+    let shopIsOpen = true; 
+    let currentCategory = "";
+    
+    // ข้อมูลโปรไฟล์ LINE ลูกค้าจริงจากระบบ LIFF
+    let lineUserId = "U_ONLINE_CUSTOMER";
+    let lineDisplayName = "ลูกค้าออนไลน์";
+    
+    let selectedMenu = null;
+    let currentOptions = { sweetness: "หวานปกติ (100%)", topLayer: "", topLayerPrice: 0, delicious: "", deliciousPrice: 0, icePack: "ไม่แยกน้ำแข็ง" };
+
+    window.onload = function() {
+      // 🚀 ทำการสตาร์ทระบบ LINE LIFF ดึงโปรไฟล์ลูกค้าจริงแบบพรีเมียม
+      liff.init({ liffId: "2006734138-vVpE6EaG" }) // 👈 บอสสามารถใส่รหัส LIFF ID ของร้านบอสตรงนี้ได้เลยครับ
+        .then(() => {
+          if (liff.isLoggedIn()) {
+            liff.getProfile().then(profile => {
+              lineUserId = profile.userId;
+              lineDisplayName = profile.displayName;
+            });
+          }
+        }).catch(err => console.log("LIFF บอสทำงานนอกแอป LINE ข้อมูลจะใช้โหมดทดสอบภายนอก"));
+
+      // ยิง fetch ไปเรียกข้อมูลสดจากคลังชีต
+      fetch(`${WEB_APP_URL}?action=get_customer_data`)
+        .then(response => response.json())
+        .then(data => {
+          shopIsOpen = data.isOpen; 
+          initializeStore(data);
+        })
+        .catch(err => {
+          document.getElementById('loading').innerText = "โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
+        });
+    };
+
+    function initializeStore(data) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('alertBanner').style.display = 'block'; 
+      document.getElementById('categoryScroll').style.display = 'flex';
+      document.getElementById('menuGrid').style.display = 'grid';
+      document.getElementById('cartBar').style.display = 'flex'; 
+
+      allMenus = data.menus;
+      renderCategories(data.categories);
+      
+      if (data.categories && data.categories.length > 0) {
+        filterMenu(data.categories[0].name);
+      } else {
+        renderMenus(allMenus);
+      }
+      updateCartStatus(); 
+    }
+
+    function renderCategories(categories) {
+      const scroll = document.getElementById('categoryScroll');
+      scroll.innerHTML = ''; 
+      categories.forEach((cat, index) => {
+        const btn = document.createElement('div');
+        btn.className = 'cat-tab' + (index === 0 ? ' active' : '');
+        btn.innerText = cat.name;
+        btn.onclick = () => {
+          document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          filterMenu(cat.name);
+        };
+        scroll.appendChild(btn);
+      });
+    }
+
+    function filterMenu(categoryName) {
+      currentCategory = categoryName;
+      const filtered = allMenus.filter(menu => menu.category.trim() === categoryName.trim());
+      renderMenus(filtered);
+    }
+
+    function renderMenus(menus) {
+      const grid = document.getElementById('menuGrid');
+      grid.innerHTML = ''; 
+      if (menus.length === 0) {
+        grid.innerHTML = '<div style="grid-column: span 2; text-align: center; color: var(--text-muted); padding: 20px;">ไม่มีข้อมูลเมนูในหมวดนี้</div>';
+        return;
+      }
+      menus.forEach(menu => {
+        const card = document.createElement('div');
+        card.className = 'menu-card';
+        const imgUrl = menu.image ? menu.image : 'https://via.placeholder.com/300x300?text=Balenrista';
+
+        card.innerHTML = `
+          <div class="menu-img-wrapper">
+            <img src="${imgUrl}" class="menu-img" alt="${menu.loyverseName}">
+          </div>
+          <div class="menu-info">
+            <div class="menu-title">${menu.loyverseName}</div>
+            <div class="menu-desc">${menu.description || ''}</div>
+            <div class="card-action-row">
+              <div class="card-price">฿${menu.price}</div>
+              <button class="add-icon-btn" onclick="openOptionsSheet('${menu.loyverseName}')">+</button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function updateModalPrice() {
+      if (!selectedMenu) return;
+      let total = selectedMenu.price + currentOptions.topLayerPrice + currentOptions.deliciousPrice;
+      document.getElementById('addCartBtn').innerText = `ใส่ตะกร้า - ฿${total}`;
+    }
+
+    function openOptionsSheet(menuName) {
+      if (!shopIsOpen) {
+        alert("ขออภัย ขณะนี้ร้านปิดทำการ");
+        return;
+      }
+      selectedMenu = allMenus.find(m => m.loyverseName === menuName);
+      if (!selectedMenu) return;
+
+      document.getElementById('optionsModalTitle').innerText = selectedMenu.loyverseName;
+      currentOptions = { sweetness: "หวานปกติ (100%)", topLayer: "", topLayerPrice: 0, delicious: "", deliciousPrice: 0, icePack: "ไม่แยกน้ำแข็ง" };
+      
+      document.querySelectorAll('.bottom-sheet .opt-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('#sweetnessGrid button:nth-child(3)').classList.add('active'); 
+      document.querySelector('#icePackGrid button:nth-child(1)').classList.add('active'); 
+
+      if (selectedMenu.loyverseName === 'Strawberry Milk Fantasy' || selectedMenu.thaiName === 'สตรอว์เบอร์รีนมแฟนตาซี') {
+        document.getElementById('topLayerSection').style.display = 'block';
+      } else {
+        document.getElementById('topLayerSection').style.display = 'none';
+      }
+
+      const coffeeMatchaMenus = ['Matcha Pure', 'Matcha Latte', 'Houjicha Latte', 'Latte', 'Cappuccino', 'Espresso', 'Mocha'];
+      if (coffeeMatchaMenus.includes(selectedMenu.loyverseName)) {
+        document.getElementById('deliciousSection').style.display = 'block';
+      } else {
+        document.getElementById('deliciousSection').style.display = 'none';
+      }
+
+      if (selectedMenu.category.toUpperCase().includes('HOT') || selectedMenu.thaiName.includes('ร้อน')) {
+        document.getElementById('icePackSection').style.display = 'none';
+        currentOptions.icePack = ""; 
+      } else {
+        document.getElementById('icePackSection').style.display = 'block';
+      }
+
+      updateModalPrice();
+      document.getElementById('optionsOverlay').style.display = 'block';
+      const sheet = document.getElementById('optionsSheet');
+      sheet.style.display = 'flex';
+      setTimeout(() => sheet.style.transform = 'translateY(0)', 10);
+    }
+
+    function closeOptionsSheet() {
+      const sheet = document.getElementById('optionsSheet');
+      sheet.style.transform = 'translateY(100%)';
+      setTimeout(() => {
+        sheet.style.display = 'none';
+        document.getElementById('optionsOverlay').style.display = 'none';
+      }, 300);
+    }
+
+    function selectOption(type, element, val, extraPrice) {
+      if (element.classList.contains('active')) {
+        if (type === 'topLayer' || type === 'delicious') {
+          element.classList.remove('active');
+          currentOptions[type] = "";
+          currentOptions[type + 'Price'] = 0;
+          updateModalPrice();
+          return;
+        }
+      }
+      
+      element.parentNode.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+      element.classList.add('active');
+      currentOptions[type] = val;
+
+      if (type === 'topLayer' || type === 'delicious') {
+        currentOptions[type + 'Price'] = extraPrice;
+      }
+      updateModalPrice(); 
+    }
+
+    function confirmAddToCart() {
+      if ((selectedMenu.loyverseName.includes("น้ำผึ้ง") || selectedMenu.thaiName.includes("น้ำผึ้ง")) && currentOptions.sweetness === "ไม่หวาน (0%)") {
+        alert("เมนูน้ำผึ้งไม่สามารถสั่งไม่หวานได้ กรุณาเลือกระดับความหวานอื่น");
+        return;
+      }
+
+      let existingItem = cart.find(item => 
+        item.loyverseName === selectedMenu.loyverseName && 
+        item.sweetness === currentOptions.sweetness && 
+        item.topLayer === currentOptions.topLayer &&
+        item.delicious === currentOptions.delicious &&
+        item.icePack === currentOptions.icePack
+      );
+
+      if (existingItem) {
+        existingItem.qty += 1;
+      } else {
+        cart.push({
+          loyverseName: selectedMenu.loyverseName,
+          basePrice: selectedMenu.price,
+          price: selectedMenu.price + currentOptions.topLayerPrice + currentOptions.deliciousPrice,
+          sweetness: currentOptions.sweetness,
+          topLayer: currentOptions.topLayer,
+          topLayerPrice: currentOptions.topLayerPrice,
+          delicious: currentOptions.delicious,
+          deliciousPrice: currentOptions.deliciousPrice,
+          icePack: currentOptions.icePack,
+          qty: 1
+        });
+      }
+
+      closeOptionsSheet();
+      updateCartStatus();
+      setTimeout(openCartSheet, 350);
+    }
+
+    function openCartSheet() {
+      if (cart.length === 0) return;
+      document.getElementById('cartOverlay').style.display = 'block';
+      const sheet = document.getElementById('cartSheet');
+      sheet.style.display = 'flex';
+      setTimeout(() => sheet.style.transform = 'translateY(0)', 10);
+      renderCartSheetItems();
+    }
+
+    function closeCartSheet() {
+      const sheet = document.getElementById('cartSheet');
+      sheet.style.transform = 'translateY(100%)';
+      setTimeout(() => {
+        sheet.style.display = 'none';
+        document.getElementById('cartOverlay').style.display = 'none';
+      }, 300);
+    }
+
+    function changeCartQty(index, change) {
+      cart[index].qty += change;
+      if (cart[index].qty <= 0) {
+        cart.splice(index, 1);
+      }
+      renderCartSheetItems();
+      updateCartStatus();
+      if (cart.length === 0) closeCartSheet();
+    }
+
+    function renderCartSheetItems() {
+      const list = document.getElementById('cartItemsList');
+      list.innerHTML = '';
+      let grandTotal = 0;
+
+      cart.forEach((item, index) => {
+        let itemTotal = item.price * item.qty;
+        grandTotal += itemTotal;
+
+        let details = `ความหวาน: ${item.sweetness}`;
+        if (item.topLayer) details += `<br>Top Layer: ${item.topLayer} ${item.topLayerPrice > 0 ? '(+'+item.topLayerPrice+'฿)' : ''}`;
+        if (item.delicious) details += `<br>เพิ่มความอร่อย: ${item.delicious} ${item.deliciousPrice > 0 ? '(+'+item.deliciousPrice+'฿)' : ''}`;
+        if (item.icePack) details += `<br>การบรรจุ: ${item.icePack}`;
+
+        const row = document.createElement('div');
+        row.className = 'cart-item-row';
+        row.innerHTML = `
+          <div>
+            <div class="cart-item-name">${item.loyverseName}</div>
+            <div class="cart-item-details">${details}</div>
+            <div style="font-size:14px; font-weight:700; margin-top:6px; color:#4CAF50;">฿${itemTotal}</div>
+          </div>
+          <div class="quantity-control">
+            <button class="qty-btn" onclick="changeCartQty(${index}, -1)">-</button>
+            <span class="qty-num">${item.qty}</span>
+            <button class="qty-btn" onclick="changeCartQty(${index}, 1)">+</button>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+      document.getElementById('cartTotalPrice').innerText = `฿${grandTotal}`;
+    }
+
+    function updateCartStatus() {
+      let totalQty = 0;
+      cart.forEach(item => totalQty += item.qty);
+
+      document.getElementById('headerCartCount').innerText = `ตะกร้า (${totalQty})`;
+
+      const mainBtn = document.getElementById('confirmBtn');
+      const sheetBtn = document.getElementById('sheetConfirmBtn');
+
+      if (!shopIsOpen) {
+        const textClose = "ขณะนี้ร้านปิดทำการ";
+        [mainBtn, sheetBtn].forEach(btn => {
+          btn.innerText = textClose; 
+          btn.disabled = true;
+          btn.style.backgroundColor = "#45423E"; 
+          btn.style.color = var(--text-muted);
+          btn.style.cursor = "not-allowed";
+        });
+        return;
+      }
+
+      if (totalQty < 4) {
+        const textLock = `ดูตะกร้าสินค้า (มีแล้ว ${totalQty} แก้ว)`;
+        mainBtn.innerText = textLock;
+        mainBtn.disabled = (totalQty === 0);
+        mainBtn.style.backgroundColor = totalQty === 0 ? "#45423E" : "var(--col-accent)";
+        mainBtn.style.color = totalQty === 0 ? "var(--text-muted)" : "var(--text-dark)";
+        mainBtn.style.cursor = totalQty === 0 ? "not-allowed" : "pointer";
+        mainBtn.onclick = totalQty > 0 ? openCartSheet : null;
+
+        sheetBtn.innerText = `ขาดอีก ${4 - totalQty} แก้ว (สั่งขั้นต่ำ 4 แก้ว)`;
+        sheetBtn.disabled = true;
+        sheetBtn.style.backgroundColor = "#45423E";
+        sheetBtn.style.color = "var(--text-muted)";
+        sheetBtn.style.cursor = "not-allowed";
+      } else {
+        mainBtn.innerText = `ตรวจสอบตะกร้า (${totalQty} แก้ว)`;
+        mainBtn.disabled = false;
+        mainBtn.style.backgroundColor = "var(--col-accent)";
+        mainBtn.style.color = "var(--text-dark)";
+        mainBtn.style.cursor = "pointer";
+        mainBtn.onclick = openCartSheet;
+
+        sheetBtn.innerText = `ยืนยันคำสั่งซื้อ`;
+        sheetBtn.disabled = false;
+        sheetBtn.style.backgroundColor = "var(--col-accent)";
+        sheetBtn.style.color = "var(--text-dark)";
+        sheetBtn.style.cursor = "pointer";
+        sheetBtn.onclick = submitOrder;
+      }
+    }
+
+    // 🚀 ยิงก้อนออเดอร์กลับไปขึ้นป๊อปอัพรอตรวจที่หน้าเว็บแอดมินของบอส
+    function submitOrder() {
+      const confirmBtn = document.getElementById('sheetConfirmBtn');
+      confirmBtn.innerText = "กำลังส่งข้อมูลคำสั่งซื้อ...";
+      confirmBtn.disabled = true;
+
+      const orderPayload = {
+        action: "submit_customer_order",
+        userId: lineUserId,
+        lineName: lineDisplayName,
+        cart: cart
+      };
+
+      fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify(orderPayload)
+      })
+      .then(res => {
+        alert("ส่งข้อมูลคำสั่งซื้อเรียบร้อยแล้วค่ะ รายการของคุณส่งไปยังระบบแอดมินแล้ว กรุณารอสักครู่นะคะ");
+        cart = []; 
+        closeCartSheet();
+        updateCartStatus();
+      })
+      .catch(err => {
+        alert("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง");
+        confirmBtn.innerText = "ยืนยันคำสั่งซื้อ";
+        confirmBtn.disabled = false;
+      });
+    }
+  </script>
+</body>
+</html>
