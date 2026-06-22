@@ -328,7 +328,7 @@
 
   <script>
     // ⚠️ นำลิงก์ Web App URL จากสมองหลังบ้าน Apps Script ของบอสมาแปะที่นี่
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz_mSSdEgJqzB7xuh4BjsXJDmGkx061p8B06XeQT-2ax53iDugCjplQuhfrkl1wqOJoQA/exec"; 
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby5UJXYPLxG-jMbfMtVcm4axGGupPFslWi1K8Y68zAXW1nUr8xOcy9H2aHKguhaYD8zzg/exec"; 
 
     let allMenus = []; 
     let cart = []; 
@@ -673,11 +673,11 @@
       confirmBtn.disabled = true;
 
       const orderPayload = {
-        action: "submit_customer_order",
-        userId: lineUserId,
-        lineName: lineDisplayName,
-        items: cart // ✨ เปลี่ยนตรงนี้จาก cart: cart เป็น items: cart เรียบร้อยครับบอส!
-      };
+  action: "submit_customer_order",
+  userId: lineUserId,
+  lineName: lineDisplayName,
+  cart: cart // ✅ เปลี่ยนกลับมาใช้ cart เหมือนเดิมเพื่อส่งให้ตรงกับหลังบ้านครับบอส!
+};
 
       fetch(WEB_APP_URL, {
         method: "POST",
