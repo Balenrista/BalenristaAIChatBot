@@ -416,7 +416,7 @@
       menus.forEach(menu => {
         const card = document.createElement('div');
         card.className = 'menu-card';
-        const imgUrl = menu.image ? menu.image : 'https://via.placeholder.com/300x300?text=Balenrista';
+        const imgUrl = item.image || `./${encodeURIComponent(item.loyverseName)}.png`;
 
         card.innerHTML = `
           <div class="menu-img-wrapper">
