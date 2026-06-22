@@ -676,7 +676,7 @@
         action: "submit_customer_order",
         userId: lineUserId,
         lineName: lineDisplayName,
-        cart: cart
+        items: cart // ✨ เปลี่ยนตรงนี้จาก cart: cart เป็น items: cart เรียบร้อยครับบอส!
       };
 
       fetch(WEB_APP_URL, {
