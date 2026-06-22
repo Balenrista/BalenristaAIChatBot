@@ -344,7 +344,7 @@
 
     window.onload = function() {
       // 🚀 ทำการสตาร์ทระบบ LINE LIFF ดึงโปรไฟล์ลูกค้าจริงแบบพรีเมียม
-      liff.init({ liffId: "2010475919-EKZVGpBS" }) // 👈 บอสสามารถใส่รหัส LIFF ID ของร้านบอสตรงนี้ได้เลยครับ
+      liff.init({ liffId: "2010475919-EKZVGpBS" }) // 👈 รหัส LIFF ID ของร้านบอส
         .then(() => {
           if (liff.isLoggedIn()) {
             liff.getProfile().then(profile => {
@@ -416,8 +416,11 @@
       menus.forEach(menu => {
         const card = document.createElement('div');
         card.className = 'menu-card';
-        // แก้ไขให้เรียกตัวแปร menu ให้ถูกต้อง 100% แล้วครับบอส
-        const imgUrl = menu.image || `./${encodeURIComponent(menu.loyverseName)}.png`;
+        
+        // 🔥 ดักจับระบบชีต: ถ้าเจอคำว่า CellImage หรือเว้นว่าง ให้วิ่งไปดึงรูป .png บน GitHub อัตโนมัติทันที
+        const imgUrl = (menu.image && menu.image !== "CellImage") 
+          ? menu.image 
+          : `./${encodeURIComponent(menu.loyverseName)}.png`;
 
         card.innerHTML = `
           <div class="menu-img-wrapper">
@@ -626,7 +629,7 @@
           btn.innerText = textClose; 
           btn.disabled = true;
           btn.style.backgroundColor = "#45423E"; 
-          btn.style.color = "var(--text-muted)"; //  ใส่เครื่องหมายคำพูดครอบไว้เรียบร้อย
+          btn.style.color = "var(--text-muted)";
           btn.style.cursor = "not-allowed";
         });
         return;
