@@ -193,7 +193,7 @@
 
     <script>
         // 🚨 สำคัญมาก: ใส่ Web App URL ของคุณไว้ที่บรรทัดนี้ 🚨
-        const API_URL = "https://script.google.com/macros/s/AKfycby47bx7Uic6v2eRkNvEsSyIIoK6vxswyVJ7e7a2zvx-7GXoxYvv47vk-LUpnqp2sGkcTg/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbz0LhnAi64fzEPNZUYhOjESt6mLqYJu-TnSZN2INf6jdIvy0v4__LKcd6zST8mey2sUnA/exec";
 
         let currentTab = 'drafts';
         let globalMenus = []; 
@@ -222,7 +222,6 @@
             if(currentTab === 'faq') fetchFaq(); 
         }
 
-        // 🎯 [บลูเล็ตพรูฟ 100%] แกะก้อน JSON โดยไม่ใช้ Regex เลย เพื่อป้องกัน Syntax Error พังทั้งระบบ
         function extractOrderData(rawText) {
             let result = { displayText: rawText || "", autoFillItems: [] };
             if (!rawText) return result;
@@ -282,7 +281,6 @@
                     let alertBadge = isAlert ? '<div style="color: var(--col-danger); font-size: 13px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 5px;"><i class="ph-fill ph-warning-circle" style="font-size: 16px;"></i> AI ไม่แน่ใจ/อ่านไม่ออก โปรดตรวจสอบ!</div>' : '';
                     
                     let aiData = extractOrderData(draftOutStr);
-                    // ใช้ split.join แทน replace ป้องกัน Regex Error
                     let cleanDraftText = aiData.displayText.split('🚨').join('').trim();
 
                     let isOrder = aiData.autoFillItems.length > 0 || messageInStr.includes('[รูปภาพกระดาษออเดอร์]') || messageInStr.includes('ออเดอร์') || messageInStr.includes('สั่ง') || messageInStr.includes('เอา');
@@ -319,8 +317,10 @@
                                 let menuName = item.loyverseName || item.name || "";
                                 let finalQty = item.qty || item.quantity || 1;
                                 let sweet = item.sweetness || "100%";
+                                let topLayer = item.topLayer || "";
+                                let delicious = item.delicious || "";
                                 
-                                addOrderItem(index, menuName, sweet, finalQty);
+                                addOrderItem(index, menuName, sweet, finalQty, topLayer, delicious);
                             });
                         } else {
                             addOrderItem(index); 
@@ -348,7 +348,7 @@
             }
         }
 
-        function addOrderItem(orderIndex, defaultLoyverseName = '', defaultSweetness = '100%', defaultQty = 1) {
+        function addOrderItem(orderIndex, defaultLoyverseName = '', defaultSweetness = '100%', defaultQty = 1, defaultTopLayer = '', defaultDelicious = '') {
             const container = document.getElementById(`order-items-${orderIndex}`);
             const rowId = 'item-' + Date.now() + Math.floor(Math.random() * 1000);
             
@@ -371,7 +371,7 @@
 
             const getSweetBtn = (pct, label) => {
                 let isActive = (activeSweetText === label) ? 'active' : '';
-                return `<button type="button" class="sweet-btn ${isActive}" onclick="setSweetness(this, '${rowId}', '${label}')">${pct}</button>`;
+                return `<button type="button" class="sweet-btn ${isActive}" onclick="setSweetness(this, '${rowId}', '${label}', ${orderIndex})">${pct}</button>`;
             };
 
             const html = `
@@ -386,7 +386,7 @@
                             <input type="number" class="qty-input builder-input" value="${defaultQty}" min="1" onchange="updateRowTotal('${rowId}', ${orderIndex})" style="text-align: center;">
                         </div>
                         <div style="flex: 1; text-align: right; font-size: 14px; font-weight: 700; color: var(--col-accent);">
-                            <span class="row-price">${matchedPrice * defaultQty}</span> ฿
+                            <span class="row-price">0</span> ฿
                         </div>
                         <button onclick="document.getElementById('${rowId}').remove(); calculateGrandTotal(${orderIndex});" style="background: none; border: none; color: var(--col-danger); cursor: pointer; padding: 4px; font-size: 18px;"><i class="ph-bold ph-x"></i></button>
                     </div>
@@ -400,17 +400,42 @@
                         ${getSweetBtn('25%', 'หวานน้อยมากๆ (25%)')}
                         ${getSweetBtn('0%', 'ไม่หวาน (0%)')}
                     </div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <div style="flex: 1;">
+                            <span style="font-size: 10px; color: var(--text-muted); display:block; margin-bottom: 2px; font-weight:600;">ซอสราดด้านบน (Top Layer)</span>
+                            <select class="top-layer-select builder-input" onchange="updateRowTotal('${rowId}', ${orderIndex})" style="font-size: 11px; padding: 6px;">
+                                <option value="">-- ไม่มีซอส --</option>
+                                <option value="Coco" ${defaultTopLayer === 'Coco' ? 'selected' : ''}>Coco</option>
+                                <option value="Green Tea" ${defaultTopLayer === 'Green Tea' ? 'selected' : ''}>Green Tea</option>
+                                <option value="Thai Tea" ${defaultTopLayer === 'Thai Tea' ? 'selected' : ''}>Thai Tea</option>
+                                <option value="Matcha" ${defaultTopLayer === 'Matcha' ? 'selected' : ''}>Matcha (+10฿)</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1;">
+                            <span style="font-size: 10px; color: var(--text-muted); display:block; margin-bottom: 2px; font-weight:600;">เพิ่มความอร่อย (Add-on)</span>
+                            <select class="delicious-select builder-input" onchange="updateRowTotal('${rowId}', ${orderIndex})" style="font-size: 11px; padding: 6px;">
+                                <option value="">-- ไม่เพิ่ม --</option>
+                                <option value="Chocolate" ${defaultDelicious === 'Chocolate' ? 'selected' : ''}>Chocolate (+10฿)</option>
+                                <option value="Cocoflower (น้ำช่อดอกมะพร้าว)" ${defaultDelicious === 'Cocoflower (น้ำช่อดอกมะพร้าว)' ? 'selected' : ''}>Cocoflower (+10฿)</option>
+                                <option value="Orange" ${defaultDelicious === 'Orange' ? 'selected' : ''}>Orange (+10฿)</option>
+                                <option value="Milk" ${defaultDelicious === 'Milk' ? 'selected' : ''}>Milk (+10฿)</option>
+                                <option value="Coffee" ${defaultDelicious === 'Coffee' ? 'selected' : ''}>Coffee (+10฿)</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             `;
             container.insertAdjacentHTML('beforeend', html);
-            calculateGrandTotal(orderIndex); 
+            updateRowTotal(rowId, orderIndex); 
         }
 
-        function setSweetness(btnElement, rowId, value) {
+        function setSweetness(btnElement, rowId, value, orderIndex) {
             const group = document.getElementById(`sweet-group-${rowId}`);
             group.querySelectorAll('.sweet-btn').forEach(b => b.classList.remove('active'));
             btnElement.classList.add('active');
             group.setAttribute('data-value', value);
+            updateRowTotal(rowId, orderIndex);
         }
 
         function updatePrice(rowId, orderIndex) {
@@ -423,9 +448,19 @@
 
         function updateRowTotal(rowId, orderIndex) {
             const row = document.getElementById(rowId);
-            const price = parseFloat(row.getAttribute('data-unit-price') || 0);
+            if (!row) return;
+            const basePrice = parseFloat(row.getAttribute('data-unit-price') || 0);
             const qty = parseInt(row.querySelector('.qty-input').value || 1);
-            row.querySelector('.row-price').innerText = price * qty;
+            
+            // 💡 คำนวณบวกเงินท็อปปิ้งเพิ่มออปชันละ 10 บาทตามกฎออนไลน์ร้าน Balenrista
+            let extraPrice = 0;
+            const topLayer = row.querySelector('.top-layer-select').value;
+            const delicious = row.querySelector('.delicious-select').value;
+            
+            if (topLayer === "Matcha") extraPrice += 10;
+            if (delicious !== "") extraPrice += 10; 
+            
+            row.querySelector('.row-price').innerText = (basePrice + extraPrice) * qty;
             calculateGrandTotal(orderIndex);
         }
 
@@ -459,14 +494,36 @@
                 
                 const displayName = select.options[select.selectedIndex].getAttribute('data-display');
                 const sweet = rows[i].querySelector('.sweet-group').getAttribute('data-value');
+                const topLayer = rows[i].querySelector('.top-layer-select').value;
+                const delicious = rows[i].querySelector('.delicious-select').value;
                 const qty = parseInt(rows[i].querySelector('.qty-input').value || 1);
-                const price = parseFloat(rows[i].getAttribute('data-unit-price') || 0);
-                const rowTotal = price * qty;
+                const basePrice = parseFloat(rows[i].getAttribute('data-unit-price') || 0);
                 
-                finalMessage += `- ${displayName} (${sweet}) x ${qty} แก้ว = ${rowTotal} บาท\n`;
+                // คำนวณตัวบวกฝั่งข้อความสรุปบิลไลน์
+                let extra = 0;
+                let addOnText = "";
+                if (topLayer) {
+                    addOnText += `, ราดซอส ${topLayer}`;
+                    if (topLayer === "Matcha") extra += 10;
+                }
+                if (delicious) {
+                    addOnText += `, เพิ่ม ${delicious}`;
+                    extra += 10;
+                }
+                
+                const rowTotal = (basePrice + extra) * qty;
+                finalMessage += `- ${displayName} (${sweet}${addOnText}) x ${qty} แก้ว = ${rowTotal} บาท\n`;
                 grandTotal += rowTotal;
 
-                loyversePayload.push({ name: loyverseName, sweetness: sweet, quantity: qty, price: price });
+                // 💡 แพ็กกล่องข้อมูลส่งทะลุท่อให้เสถียร รองรับทั้งหวานและกลุ่มท็อปปิ้ง
+                loyversePayload.push({ 
+                    name: loyverseName, 
+                    sweetness: sweet, 
+                    topLayer: topLayer || "",
+                    delicious: delicious || "",
+                    quantity: qty, 
+                    price: basePrice + extra 
+                });
             }
 
             finalMessage += `\n**ยอดรวมทั้งหมด: ${grandTotal} บาท**\n\nระบบกำลังส่งออเดอร์ไปที่บาร์น้ำ รอรับความสดชื่นได้เลยค่ะ ☕️💖`;
@@ -613,11 +670,13 @@
             try {
                 document.body.style.cursor = 'wait';
                 const response = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "broadcast_message", message: msg }) });
-                const result = await response.json();
-                if (result.status === "success") {
-                    alert(`✅ ส่งข้อความสำเร็จ! เข้าถึงลูกค้าทั้งหมด ${result.count} คน`);
+                
+                // 🛠️ ปรับแก้ให้อ่านค่า text แทน json ชั่วคราวเพื่อเลี่ยงบั๊กขาดีดคำว่า "OK" ของ Apps Script
+                const textResult = await response.text();
+                if (textResult.includes("OK") || textResult.includes("success")) {
+                    alert(`✅ ส่งข้อความประกาศหาลูกค้าสำเร็จเรียบร้อยแล้วครับบอส!`);
                     document.getElementById('broadcast-msg').value = ''; 
-                } else { alert("🚨 เกิดข้อผิดพลาดในการส่ง"); }
+                } else { alert("🚨 เกิดข้อผิดพลาดในการส่ง: " + textResult); }
             } catch (error) { alert("🚨 เกิดข้อผิดพลาดในการเชื่อมต่อ"); } 
             finally { document.body.style.cursor = 'default'; }
         }
