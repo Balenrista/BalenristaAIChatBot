@@ -7,14 +7,15 @@
   
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
   
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     
     :root {
-      --bg-main: #0A0A0A;       /* สีพื้นหลังหลักของแอดมิน */
-      --bg-card: #33312F;       /* สีกล่องการ์ดแอดมิน */
-      --col-accent: #B7B4AE;    /* สีครีมเอกลักษณ์ของร้าน */
+      --bg-main: #0A0A0A;       
+      --bg-card: #33312F;       
+      --col-accent: #B7B4AE;    
       --col-danger: #ff4d4d;
       --text-muted: #726E68;
       --text-dark: #0A0A0A;
@@ -121,7 +122,7 @@
     .menu-title { font-size: 14px; font-weight: 600; line-height: 1.4; margin-bottom: 4px; color: var(--col-accent); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .menu-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1; }
     
-    /* แถวด้านล่างการ์ด ราคา + ปุ่มบวก */
+    /* ราคา + ปุ่มบวก */
     .card-action-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
     .card-price { font-size: 15px; font-weight: 700; color: #4CAF50; }
     .add-icon-btn { 
@@ -232,13 +233,28 @@
     .summary-row { display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--col-accent); }
 
     #loading { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
+
+    /* หน้าต่างป๊อปอัพกรอกข้อมูลจัดส่งสไตล์ Balenrista Minimal */
+    .delivery-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+    .delivery-modal-content { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 24px; border-radius: 24px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); position: relative; animation: modalFade 0.2s ease-out; }
+    @keyframes modalFade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-title { font-size: 15px; font-weight: 700; color: var(--col-accent); margin-bottom: 18px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .modal-group { margin-bottom: 14px; text-align: left; }
+    .modal-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .modal-input { width: 100%; padding: 12px; border-radius: var(--border-radius-btn); background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--col-accent); font-size: 14px; font-family: inherit; box-sizing: border-box; transition: border-color 0.2s; }
+    .modal-input:focus { outline: none; border-color: var(--col-accent); }
+    .modal-btn-group { display: flex; gap: 10px; margin-top: 20px; }
+    .modal-btn { flex: 1; padding: 12px; font-size: 14px; font-weight: 700; border: none; border-radius: var(--border-radius-btn); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Prompt', sans-serif; }
+    .modal-btn-confirm { background-color: var(--col-accent); color: var(--text-dark); }
+    .modal-btn-cancel { background-color: #241111; color: var(--col-danger); border: 1px solid var(--border-color); }
+    .modal-btn:active { transform: scale(0.97); }
   </style>
 </head>
 <body>
 
   <div class="header">
     <span>Balenrista Order Online</span>
-    <span id="headerCartCount" style="font-size: 14px; font-weight: 500;">ตะกร้า (0)</span>
+    <span id="headerCartCount" style="font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 6px;"><i class="ph-bold ph-shopping-cart"></i> (0)</span>
   </div>
 
   <div class="container">
@@ -326,16 +342,36 @@
     </div>
   </div>
 
+  <div id="deliveryModal" class="delivery-modal">
+      <div class="delivery-modal-content">
+          <div class="modal-title"><i class="ph-bold ph-map-pin"></i> ข้อมูลสำหรับจัดส่งสินค้า</div>
+          <div class="modal-group">
+              <label>ชื่อผู้รับ</label>
+              <input type="text" id="dev-name" class="modal-input" placeholder="ระบุชื่อผู้รับสินค้า">
+          </div>
+          <div class="modal-group">
+              <label>เบอร์โทรติดต่อ</label>
+              <input type="tel" id="dev-phone" class="modal-input" placeholder="ระบุเบอร์โทรศัพท์มือถือ">
+          </div>
+          <div class="modal-group">
+              <label>สถานที่จัดส่ง (ที่อยู่ / อาคาร / ชั้น)</label>
+              <textarea id="dev-address" class="modal-input" rows="3" placeholder="ระบุรายละเอียดสถานที่จัดส่งโดยละเอียด"></textarea>
+          </div>
+          <div class="modal-btn-group">
+              <button class="modal-btn modal-btn-cancel" onclick="closeDeliveryModal()"><i class="ph-bold ph-x"></i> ยกเลิก</button>
+              <button class="modal-btn modal-btn-confirm" onclick="confirmFinalOrder()"><i class="ph-bold ph-check"></i> ยืนยันคำสั่งซื้อ</button>
+          </div>
+      </div>
+  </div>
+
   <script>
-    // ⚠️ นำลิงก์ Web App URL จากสมองหลังบ้าน Apps Script ของบอสมาแปะที่นี่
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz0LhnAi64fzEPNZUYhOjESt6mLqYJu-TnSZN2INf6jdIvy0v4__LKcd6zST8mey2sUnA/exec"; 
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzzq-W1aBCFa8IKpFgEaTYaYMh87VuImvmiFEx8UFzHljgDvrZ2DFy1IXA0-P6GWLpEpw/exec"; 
 
     let allMenus = []; 
     let cart = []; 
     let shopIsOpen = true; 
     let currentCategory = "";
     
-    // ข้อมูลโปรไฟล์ LINE ลูกค้าจริงจากระบบ LIFF
     let lineUserId = "U_ONLINE_CUSTOMER";
     let lineDisplayName = "ลูกค้าออนไลน์";
     
@@ -343,8 +379,7 @@
     let currentOptions = { sweetness: "หวานปกติ (100%)", topLayer: "", topLayerPrice: 0, delicious: "", deliciousPrice: 0, icePack: "ไม่แยกน้ำแข็ง" };
 
     window.onload = function() {
-      // 🚀 ทำการสตาร์ทระบบ LINE LIFF ดึงโปรไฟล์ลูกค้าจริงแบบพรีเมียม
-      liff.init({ liffId: "2010475919-EKZVGpBS" }) // 👈 รหัส LIFF ID ของร้านบอส
+      liff.init({ liffId: "2010475919-EKZVGpBS" }) 
         .then(() => {
           if (liff.isLoggedIn()) {
             liff.getProfile().then(profile => {
@@ -354,7 +389,6 @@
           }
         }).catch(err => console.log("LIFF บอสทำงานนอกแอป LINE ข้อมูลจะใช้โหมดทดสอบภายนอก"));
 
-      // ยิง fetch ไปเรียกข้อมูลสดจากคลังชีต
       fetch(`${WEB_APP_URL}?action=get_customer_data`)
         .then(response => response.json())
         .then(data => {
@@ -417,7 +451,6 @@
         const card = document.createElement('div');
         card.className = 'menu-card';
         
-        // 🔥 ดักจับระบบชีต: ถ้าเจอคำว่า CellImage หรือเว้นว่าง ให้วิ่งไปดึงรูป .png บน GitHub อัตโนมัติทันที
         const imgUrl = (menu.image && menu.image !== "CellImage") 
           ? menu.image 
           : `./${encodeURIComponent(menu.loyverseName)}.png`;
@@ -618,7 +651,8 @@
       let totalQty = 0;
       cart.forEach(item => totalQty += item.qty);
 
-      document.getElementById('headerCartCount').innerText = `ตะกร้า (${totalQty})`;
+      // เปลี่ยนมาใช้ .innerHTML เพื่อสลักฐานข้อมูลไอคอนช็อปปิ้งมินิมอลออโตเมติก
+      document.getElementById('headerCartCount').innerHTML = `<i class="ph-bold ph-shopping-cart"></i> (${totalQty})`;
 
       const mainBtn = document.getElementById('confirmBtn');
       const sheetBtn = document.getElementById('sheetConfirmBtn');
@@ -666,25 +700,48 @@
       }
     }
 
-    // 🚀 ยิงก้อนออเดอร์กลับไปขึ้นป๊อปอัพรอตรวจที่หน้าเว็บแอดมินของบอส
+    // สั่งเปิดป๊อปอัพดักกรอกข้อมูลจัดส่งสไตล์มินิมอล
     function submitOrder() {
+      document.getElementById('deliveryModal').style.display = 'flex';
+    }
+
+    function closeDeliveryModal() {
+      document.getElementById('deliveryModal').style.display = 'none';
+    }
+
+    // ฟังก์ชันรวบยอดออเดอร์พร้อมข้อมูลจัดส่ง ยิงตูมเข้าท่อหลักหลังบ้าน
+    function confirmFinalOrder() {
+      const name = document.getElementById('dev-name').value.trim();
+      const phone = document.getElementById('dev-phone').value.trim();
+      const address = document.getElementById('dev-address').value.trim();
+      
+      if (!name || !phone || !address) {
+        alert("กรุณากรอกข้อมูลจัดส่งให้ครบถ้วนทุกช่องค่ะ");
+        return;
+      }
+      
       const confirmBtn = document.getElementById('sheetConfirmBtn');
       confirmBtn.innerText = "กำลังส่งข้อมูลคำสั่งซื้อ...";
       confirmBtn.disabled = true;
+      
+      closeDeliveryModal();
 
       const orderPayload = {
-  action: "submit_customer_order",
-  userId: lineUserId,
-  lineName: lineDisplayName,
-  cart: cart // ✅ เปลี่ยนกลับมาใช้ cart เหมือนเดิมเพื่อส่งให้ตรงกับหลังบ้านครับบอส!
-};
+        action: "submit_customer_order",
+        userId: lineUserId,
+        lineName: name, 
+        customerPhone: phone, 
+        customerAddress: address, 
+        cart: cart 
+      };
 
+      document.body.style.cursor = 'wait';
       fetch(WEB_APP_URL, {
         method: "POST",
         body: JSON.stringify(orderPayload)
       })
       .then(res => {
-        alert("ส่งข้อมูลคำสั่งซื้อเรียบร้อยแล้วค่ะ รายการของคุณส่งไปยังระบบแอดมินแล้ว กรุณารอสักครู่นะคะ");
+        alert("บันทึกคำสั่งซื้อเรียบร้อยแล้ว รายการส่งไปยังระบบแอดมินและอีเมลร้านเรียบร้อยแล้วค่ะ");
         cart = []; 
         closeCartSheet();
         updateCartStatus();
@@ -693,6 +750,9 @@
         alert("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง");
         confirmBtn.innerText = "ยืนยันคำสั่งซื้อ";
         confirmBtn.disabled = false;
+      })
+      .finally(() => {
+        document.body.style.cursor = 'default';
       });
     }
   </script>
