@@ -6,7 +6,7 @@
   <title>Balenrista - Order Online</title>
   
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   
   <style>
@@ -248,6 +248,13 @@
     .modal-btn-confirm { background-color: var(--col-accent); color: var(--text-dark); }
     .modal-btn-cancel { background-color: #241111; color: var(--col-danger); border: 1px solid var(--border-color); }
     .modal-btn:active { transform: scale(0.97); }
+
+    /* หน้าต่างป๊อปอัพสำเร็จออเดอร์ & แจกแต้มพรีเมียม */
+    .success-modal { display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+    .success-modal-content { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 35px 24px; border-radius: 24px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); animation: modalFade 0.2s ease-out; }
+    .success-icon-box { font-size: 54px; color: #4CAF50; margin-bottom: 16px; }
+    .success-points-display { font-size: 42px; font-weight: 700; color: var(--col-accent); margin: 12px 0 4px 0; font-family: 'Poppins', sans-serif; }
+    .success-points-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; }
   </style>
 </head>
 <body>
@@ -334,9 +341,13 @@
     </div>
     <div class="cart-items-list sheet-content" id="cartItemsList"></div>
     <div class="sheet-footer">
-      <div class="summary-row">
+      <div class="summary-row" style="margin-bottom: 8px;">
         <span>ยอดรวมทั้งสิ้น</span>
         <span id="cartTotalPrice" style="color:#4CAF50;">฿0</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 16px; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px;">
+        <span><i class="ph-fill ph-gift" style="color: var(--col-accent); margin-right: 4px;"></i> แต้มสะสมที่จะได้รับ</span>
+        <span id="cartTotalPoints" style="color: var(--col-accent); font-weight: 700;">0 แต้ม</span>
       </div>
       <button class="confirm-btn" id="sheetConfirmBtn" disabled>ยืนยันคำสั่งซื้อ</button>
     </div>
@@ -364,8 +375,24 @@
       </div>
   </div>
 
+  <div id="successModal" class="success-modal">
+      <div class="success-modal-content">
+          <div class="success-icon-box"><i class="ph-fill ph-check-circle"></i></div>
+          <h3 style="font-size: 18px; color: var(--col-accent); font-weight: 700;">สั่งซื้อสำเร็จเรียบร้อยค่ะ!</h3>
+          
+          <div class="success-points-display" id="successPointsText">+0 แต้ม</div>
+          <div class="success-points-label">คะแนนสะสมที่คุณได้รับ</div>
+          
+          <p id="successModalDesc" style="font-size: 13px; color: #9a968f; line-height: 1.6; margin-bottom: 25px;"></p>
+          
+          <button class="modal-btn modal-btn-confirm" id="claimRewardBtn" style="width: 100%; padding: 14px; font-size: 14px; border-radius: 12px;">
+              <i class="ph-bold ph-gift"></i> จิ้มรับแต้มสะสมเลย
+          </button>
+      </div>
+  </div>
+
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxP0Tm-DSu3AE6xmDu5pz0Q8F-UN4A1w_29JG3B4_9IZw9K3t6wIcJkJzh5kyLPqxEWqA/exec"; 
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxoJ2JdDYkj2uKPzybBHapvq8rO4odeMtNwBJgod_e_SE5t4R3RgtQ-BsbB4SqMALj0PA/exec"; 
 
     let allMenus = []; 
     let cart = []; 
@@ -618,10 +645,12 @@
       const list = document.getElementById('cartItemsList');
       list.innerHTML = '';
       let grandTotal = 0;
+      let totalGlasses = 0;
 
       cart.forEach((item, index) => {
         let itemTotal = item.price * item.qty;
         grandTotal += itemTotal;
+        totalGlasses += item.qty;
 
         let details = `ความหวาน: ${item.sweetness}`;
         if (item.topLayer) details += `<br>Top Layer: ${item.topLayer} ${item.topLayerPrice > 0 ? '(+'+item.topLayerPrice+'฿)' : ''}`;
@@ -644,14 +673,15 @@
         `;
         list.appendChild(row);
       });
+      
       document.getElementById('cartTotalPrice').innerText = `฿${grandTotal}`;
+      document.getElementById('cartTotalPoints').innerText = `${totalGlasses} แต้ม`;
     }
 
     function updateCartStatus() {
       let totalQty = 0;
       cart.forEach(item => totalQty += item.qty);
 
-      // เปลี่ยนมาใช้ .innerHTML เพื่อสลักฐานข้อมูลไอคอนช็อปปิ้งมินิมอลออโตเมติก
       document.getElementById('headerCartCount').innerHTML = `<i class="ph-bold ph-shopping-cart"></i> (${totalQty})`;
 
       const mainBtn = document.getElementById('confirmBtn');
@@ -700,7 +730,6 @@
       }
     }
 
-    // สั่งเปิดป๊อปอัพดักกรอกข้อมูลจัดส่งสไตล์มินิมอล
     function submitOrder() {
       document.getElementById('deliveryModal').style.display = 'flex';
     }
@@ -709,7 +738,6 @@
       document.getElementById('deliveryModal').style.display = 'none';
     }
 
-    // ฟังก์ชันรวบยอดออเดอร์พร้อมข้อมูลจัดส่ง ยิงตูมเข้าท่อหลักหลังบ้าน
     function confirmFinalOrder() {
       const name = document.getElementById('dev-name').value.trim();
       const phone = document.getElementById('dev-phone').value.trim();
@@ -740,11 +768,38 @@
         method: "POST",
         body: JSON.stringify(orderPayload)
       })
-      .then(res => {
-        alert("บันทึกคำสั่งซื้อเรียบร้อยแล้ว รายการส่งไปยังระบบแอดมินและอีเมลร้านเรียบร้อยแล้วค่ะ");
-        cart = []; 
-        closeCartSheet();
-        updateCartStatus();
+      .then(response => response.json()) 
+      .then(data => {
+        if (data.status === "success") {
+          cart = []; 
+          closeCartSheet();
+          updateCartStatus();
+          
+          document.getElementById('successPointsText').innerText = `+${data.points} แต้ม`;
+          
+          const claimBtn = document.getElementById('claimRewardBtn');
+          const descText = document.getElementById('successModalDesc');
+          
+          if (data.points > 30) {
+            descText.innerHTML = "ระบบบันทึกออเดอร์เข้าบาร์น้ำเรียบร้อยแล้วค่ะ<br><br>เนื่องจากคุณสั่งซื้อจำนวนมาก แอดมินได้แยกแต้มสะสมครบลบชุดไว้ให้ในแชท LINE เรียบร้อยแล้ว สามารถเปิดแชทกดรับได้เลยนะคะ";
+            claimBtn.innerHTML = `<i class="ph-bold ph-chat-circle"></i> เปิดแอป LINE เพื่อกดรับแต้ม`;
+            claimBtn.onclick = function() {
+              window.location.href = "https://line.me/R/nv/chat"; 
+            };
+          } else {
+            descText.innerText = "ระบบบันทึกออเดอร์เข้าบาร์น้ำเรียบร้อยแล้วค่ะ จิ้มปุ่มด้านล่างเพื่อรับแต้มสะสมเข้าบัตร LINE OA ของคุณได้ทันทีเลยนะคะ";
+            claimBtn.innerHTML = `<i class="ph-bold ph-gift"></i> จิ้มรับแต้มสะสมเลย`;
+            claimBtn.onclick = function() {
+              window.location.href = data.rewardLink; 
+            };
+          }
+          
+          document.getElementById('successModal').style.display = 'flex';
+        } else {
+          alert("เกิดข้อผิดพลาดจากระบบหลังบ้าน: " + data.msg);
+          confirmBtn.innerText = "ยืนยันคำสั่งซื้อ";
+          confirmBtn.disabled = false;
+        }
       })
       .catch(err => {
         alert("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง");
