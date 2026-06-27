@@ -149,7 +149,7 @@
                     <option value="เสาร์">วันเสาร์</option>
                     <option value="อาทิตย์">วันอาทิตย์</option>
                 </select>
-                        </div>
+            </div>
 
             <div class="setting-group" style="margin-top: 15px;">
                 <label class="setting-label">วันหยุดพิเศษ (ช่วงเทศกาล วว/ดด/ปปปป)</label>
@@ -164,7 +164,6 @@
             </div>
             
             <button class="save-btn" onclick="saveStoreSettings()"><i class="ph-bold ph-floppy-disk"></i> บันทึกการตั้งค่าร้าน</button>
-
         </div>
     </div>
 
@@ -204,17 +203,11 @@
     <button class="refresh-btn" onclick="refreshCurrentTab()"><i class="ph-bold ph-arrows-clockwise"></i></button>
 
     <script>
-        // 🚨 สำคัญมาก: ใส่ Web App URL ของคุณไว้ที่บรรทัดนี้ 🚨
-        const API_URL = "https://script.google.com/macros/s/AKfycby_gWK1uZH-JIzd1_UXitpLSF6MILzmziNlTdRX3QzqU1oGMFCiqLbnb3Hxzv8WkL4bZw/exec";
-
+        const API_URL = "https://script.google.com/macros/s/AKfycbxluWmUrmclY2m-GzEi3zUfyNfXFOnx4THYfj3wTavYTa8pr7q3hppcpg_Tx7s-iyhw/exec";
         let currentTab = 'drafts';
         let globalMenus = []; 
 
         document.addEventListener('DOMContentLoaded', async () => {
-            if(API_URL.includes("ใส่_WEB_APP_URL")) {
-                document.getElementById('order-container').innerHTML = '<p style="text-align: center; color: var(--col-danger);">🚨 ลืมใส่ API_URL ในโค้ดครับ! หน้าเว็บเลยไม่ทำงาน</p>';
-                return;
-            }
             await preloadMenu();
             fetchOrders();
         });
@@ -237,11 +230,8 @@
         function extractOrderData(rawText) {
             let result = { displayText: rawText || "", autoFillItems: [] };
             if (!rawText) return result;
-            
             let str = String(rawText);
-            // 💡 สกัดจับ JSON ทั้งแบบมีกรอบ ```json และแบบไม่มีกรอบเผื่อ AI ลืมใส่
             let jsonMatch = str.match(/```json([\s\S]*?)```/i) || str.match(/\[\s*\{[\s\S]*?\}\s*\]/);
-
             if (jsonMatch) {
                 try {
                     let jsonText = jsonMatch[0].replace(/```json/i, "").replace(/```/g, "").trim();
@@ -256,12 +246,11 @@
             try {
                 const response = await fetch(API_URL + "?action=get_menu");
                 const menus = await response.json();
-                
                 globalMenus = menus
                     .filter(m => m[2] && m[5] !== "OFF" && m[5] !== "หมด") 
                     .map(m => ({ 
                         displayName: m[1] ? m[1] : m[2], 
-                        loyverseName: m[2],              
+                        loyverseName: m[2],             
                         price: parseFloat(m[3]) || 0     
                     }));
             } catch(e) { console.error("โหลดเมนูไม่สำเร็จ"); }
@@ -270,16 +259,23 @@
         async function fetchOrders() {
             const container = document.getElementById('order-container');
             const emptyState = document.getElementById('empty-state');
-            container.innerHTML = '<p style="text-align: center; color: #726E68;">กำลังโหลด...</p>';
+            container.innerHTML = '<p style="text-align: center; color: #726E68;">กำลังโหลดออเดอร์...</p>';
             emptyState.style.display = 'none';
             
             try {
                 const response = await fetch(API_URL + "?action=get_drafts");
                 const orders = await response.json();
                 container.innerHTML = "";
-                if (orders.length === 0) { emptyState.style.display = 'block'; return; }
                 
-                orders.forEach((order, index) => {
+                // 🌟 กรองข้อมูล: แสดงเฉพาะออเดอร์ที่สถานะไม่ใช่ Verified
+                const activeOrders = orders.filter(o => o.status !== "Verified");
+                
+                if (activeOrders.length === 0) { 
+                    emptyState.style.display = 'block'; 
+                    return; 
+                }
+                
+                activeOrders.forEach((order, index) => {
                     const card = document.createElement('div');
                     card.className = "order-card";
                     
@@ -291,10 +287,8 @@
                     
                     let aiData = extractOrderData(draftOutStr);
                     let cleanDraftText = aiData.displayText.split('🚨').join('').trim();
-
                     let isOrder = aiData.autoFillItems.length > 0 || messageInStr.includes('[รูปภาพกระดาษออเดอร์]') || messageInStr.includes('ออเดอร์') || messageInStr.includes('สั่ง') || messageInStr.includes('เอา');
 
-                    // 💡 ส่วนที่เพิ่มใหม่: แถบแสดงชื่อลูกค้าและเวลาที่สั่ง
                     let custNameDisplay = order.userName ? order.userName : "ลูกค้าแชทไลน์";
                     let timeDisplay = new Date(order.timestamp).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
                     
@@ -309,22 +303,19 @@
                         card.innerHTML = cardHeaderHtml + `
                             <div class="message-box" style="margin-top: 0;"><strong><i class="ph-fill ph-chat-text"></i> ลูกค้าส่งมา:</strong>${messageInStr}</div>
                             <div class="message-box" style="margin-bottom: 10px; border-left-color: ${isAlert ? 'var(--col-danger)' : 'var(--col-accent)'}; background-color: ${isAlert ? '#241111' : 'var(--bg-main)'};">
-                                <strong><i class="ph-fill ph-sparkle"></i> ข้อมูลที่ AI วิเคราะห์ได้ (ใช้อ้างอิง):</strong>
+                                <strong><i class="ph-fill ph-sparkle"></i> ข้อมูลที่ AI วิเคราะห์ได้:</strong>
                                 ${alertBadge}
                                 <div class="ai-display-text" style="font-size: 13px; margin-top: 5px; white-space: pre-wrap; color: #9a968f;">${cleanDraftText}</div>
                             </div>
-
                             <div class="builder-box">
-                                <strong style="display: block; margin-bottom: 10px; color: var(--col-accent); font-size: 13px;"><i class="ph-bold ph-pencil-simple"></i> สร้างบิลออเดอร์ (ข้อมูลจะนำไปเข้าระบบ POS)</strong>
+                                <strong style="display: block; margin-bottom: 10px; color: var(--col-accent); font-size: 13px;"><i class="ph-bold ph-pencil-simple"></i> สร้างบิลออเดอร์</strong>
                                 <div id="order-items-${index}"></div>
-                                <button onclick="addOrderItem(${index})" style="background: transparent; color: var(--col-accent); border: 1px dashed #45423E; padding: 8px; border-radius: 8px; width: 100%; margin-top: 10px; cursor: pointer; font-family: inherit; font-size: 12px; transition: 0.2s;"><i class="ph-bold ph-plus"></i> เพิ่มเมนูเอง</button>
-                                
+                                <button onclick="addOrderItem(${index})" style="background: transparent; color: var(--col-accent); border: 1px dashed #45423E; padding: 8px; border-radius: 8px; width: 100%; margin-top: 10px; cursor: pointer; font-family: inherit; font-size: 12px;"><i class="ph-bold ph-plus"></i> เพิ่มเมนูเอง</button>
                                 <div class="total-section">
                                     <span style="font-size: 14px; font-weight: 600; color: var(--text-muted);">ยอดรวมสุทธิ</span>
                                     <span style="font-size: 20px; font-weight: 700; color: #4CAF50;"><span id="order-total-${index}">0</span> ฿</span>
                                 </div>
                             </div>
-
                             <div class="button-group">
                                 ${isAlert ? `<button class="action-btn" style="background-color: #E67E22; color: #fff; border: none; flex: 1.5;" onclick="retryAI('${order.timestamp}')"><i class="ph-bold ph-arrows-clockwise"></i> สั่ง AI อ่านใหม่</button>` : ''}
                                 <button class="action-btn approve-btn" onclick="submitOrderBuilder('${order.timestamp}', '${order.userId}', ${index})"><i class="ph-bold ph-check-circle"></i> ยืนยัน & ส่งบิล</button>
@@ -332,31 +323,22 @@
                             </div>
                         `;
                         container.appendChild(card);
-                        
                         if (aiData.autoFillItems.length > 0) {
                             aiData.autoFillItems.forEach(item => {
                                 let menuName = item.loyverseName || item.name || "";
                                 let finalQty = item.qty || item.quantity || 1;
                                 let sweet = item.sweetness || "100%";
-                                let topLayer = item.topLayer || "";
-                                let delicious = item.delicious || "";
-                                
-                                addOrderItem(index, menuName, sweet, finalQty, topLayer, delicious);
+                                addOrderItem(index, menuName, sweet, finalQty, item.topLayer || "", item.delicious || "");
                             });
-                        } else {
-                            addOrderItem(index); 
-                        }
-                        
+                        } else { addOrderItem(index); }
                     } else {
                         card.innerHTML = cardHeaderHtml + `
                             <div class="message-box" style="margin-top: 0;"><strong><i class="ph-fill ph-chat-text"></i> ลูกค้าส่งมา:</strong>${messageInStr}</div>
                             <div class="message-box" style="margin-bottom: 0; border-left-color: ${isAlert ? 'var(--col-danger)' : 'var(--col-accent)'};">
-                                <strong><i class="ph-fill ph-sparkle"></i> AI ร่างคำตอบ (แอดมินแก้ไขได้ ✏️):</strong>
-                                ${alertBadge}
-                                <textarea id="draft-text-${index}" class="editable-draft-box" rows="5" style="${isAlert ? 'border: 2px solid var(--col-danger); background-color: #241111;' : ''}">${cleanDraftText}</textarea>
+                                <strong><i class="ph-fill ph-sparkle"></i> AI ร่างคำตอบ:</strong>
+                                <textarea id="draft-text-${index}" class="editable-draft-box" rows="5">${cleanDraftText}</textarea>
                             </div>
                             <div class="button-group">
-                                ${isAlert ? `<button class="action-btn" style="background-color: #E67E22; color: #fff; border: none; flex: 1.5;" onclick="retryAI('${order.timestamp}')"><i class="ph-bold ph-arrows-clockwise"></i> สั่ง AI อ่านใหม่</button>` : ''}
                                 <button class="action-btn approve-btn" onclick="const msg = document.getElementById('draft-text-${index}').value; processOrder('${order.timestamp}', '${order.userId}', msg, 'approve')"><i class="ph-bold ph-paper-plane-tilt"></i> ส่งข้อความ</button>
                                 <button class="action-btn reject-btn" onclick="processOrder('${order.timestamp}', null, null, 'reject')"><i class="ph-bold ph-trash"></i> ลบทิ้ง</button>
                             </div>
@@ -364,30 +346,21 @@
                         container.appendChild(card);
                     }
                 });
-            } catch (error) { 
-                console.error(error); 
-                container.innerHTML = `<p style="text-align: center; color: var(--col-danger);">🚨 เกิดข้อผิดพลาดในการรันระบบ Javascript: ${error.message}</p>`; 
-            }
+            } catch (error) { console.error(error); }
         }
 
         function addOrderItem(orderIndex, defaultLoyverseName = '', defaultSweetness = '100%', defaultQty = 1, defaultTopLayer = '', defaultDelicious = '') {
             const container = document.getElementById(`order-items-${orderIndex}`);
             const rowId = 'item-' + Date.now() + Math.floor(Math.random() * 1000);
-            
             let menuOptions = '<option value="">-- เลือกเมนู --</option>';
             let matchedPrice = 0;
-
             globalMenus.forEach(m => { 
                 let isSelected = (m.loyverseName.trim() === defaultLoyverseName.trim()) ? 'selected' : '';
                 if(isSelected) matchedPrice = m.price;
                 menuOptions += `<option value="${m.loyverseName}" data-display="${m.displayName}" data-price="${m.price}" ${isSelected}>${m.displayName}</option>`; 
             });
-
-            const sweetMap = {
-                '200%': 'หวานตัดขา (200%)', '125%': 'เพิ่มหวาน (125%)', '100%': 'หวานปกติ (100%)',
-                '75%': 'หวานน้อย (75%)', '50%': 'หวานกลาง (50%)', '25%': 'หวานน้อยมากๆ (25%)', '0%': 'ไม่หวาน (0%)'
-            };
             
+            const sweetMap = { '200%': 'หวานตัดขา (200%)', '125%': 'เพิ่มหวาน (125%)', '100%': 'หวานปกติ (100%)', '75%': 'หวานน้อย (75%)', '50%': 'หวานกลาง (50%)', '25%': 'หวานน้อยมากๆ (25%)', '0%': 'ไม่หวาน (0%)' };
             let activeSweetText = sweetMap[defaultSweetness] || sweetMap['100%']; 
             if (Object.values(sweetMap).includes(defaultSweetness)) { activeSweetText = defaultSweetness; }
 
@@ -400,9 +373,7 @@
                 <div id="${rowId}" class="builder-row" data-unit-price="${matchedPrice}">
                     <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
                         <div style="flex: 2;">
-                            <select class="menu-select builder-input" onchange="updatePrice('${rowId}', ${orderIndex})">
-                                ${menuOptions}
-                            </select>
+                            <select class="menu-select builder-input" onchange="updatePrice('${rowId}', ${orderIndex})">${menuOptions}</select>
                         </div>
                         <div style="flex: 0.8;">
                             <input type="number" class="qty-input builder-input" value="${defaultQty}" min="1" onchange="updateRowTotal('${rowId}', ${orderIndex})" style="text-align: center;">
@@ -412,7 +383,6 @@
                         </div>
                         <button onclick="document.getElementById('${rowId}').remove(); calculateGrandTotal(${orderIndex});" style="background: none; border: none; color: var(--col-danger); cursor: pointer; padding: 4px; font-size: 18px;"><i class="ph-bold ph-x"></i></button>
                     </div>
-                    
                     <div class="sweet-group" id="sweet-group-${rowId}" data-value="${activeSweetText}">
                         ${getSweetBtn('200%', 'หวานตัดขา (200%)')}
                         ${getSweetBtn('125%', 'เพิ่มหวาน (125%)')}
@@ -422,7 +392,6 @@
                         ${getSweetBtn('25%', 'หวานน้อยมากๆ (25%)')}
                         ${getSweetBtn('0%', 'ไม่หวาน (0%)')}
                     </div>
-
                     <div style="display: flex; gap: 8px; margin-top: 8px;">
                         <div style="flex: 1;">
                             <span style="font-size: 10px; color: var(--text-muted); display:block; margin-bottom: 2px; font-weight:600;">ซอสราดด้านบน (Top Layer)</span>
@@ -460,21 +429,14 @@
             updateRowTotal(rowId, orderIndex);
         }
 
-        function updatePrice(rowId, orderIndex) {
-            const row = document.getElementById(rowId);
-            const select = row.querySelector('.menu-select');
-            const price = select.options[select.selectedIndex]?.getAttribute('data-price') || 0;
-            row.setAttribute('data-unit-price', price);
-            updateRowTotal(rowId, orderIndex);
-        }
-
-        function updateRowTotal(rowId, orderIndex) {
-            const row = document.getElementById(rowId);
-            if (!row) return;
-            const basePrice = parseFloat(row.getAttribute('data-unit-price') || 0);
-            const qty = parseInt(row.querySelector('.qty-input').value || 1);
+        function updatePrice(rowId, orderIndex) { const row = document.getElementById(rowId); const select = row.querySelector('.menu-select'); const price = select.options[select.selectedIndex]?.getAttribute('data-price') || 0; row.setAttribute('data-unit-price', price); updateRowTotal(rowId, orderIndex); }
+        
+        function updateRowTotal(rowId, orderIndex) { 
+            const row = document.getElementById(rowId); 
+            if (!row) return; 
+            const basePrice = parseFloat(row.getAttribute('data-unit-price') || 0); 
+            const qty = parseInt(row.querySelector('.qty-input').value || 1); 
             
-            // 💡 คำนวณบวกเงินท็อปปิ้งเพิ่มออปชันละ 10 บาทตามกฎออนไลน์ร้าน Balenrista
             let extraPrice = 0;
             const topLayer = row.querySelector('.top-layer-select').value;
             const delicious = row.querySelector('.delicious-select').value;
@@ -482,17 +444,12 @@
             if (topLayer === "Matcha") extraPrice += 10;
             if (delicious !== "") extraPrice += 10; 
             
-            row.querySelector('.row-price').innerText = (basePrice + extraPrice) * qty;
-            calculateGrandTotal(orderIndex);
+            row.querySelector('.row-price').innerText = (basePrice + extraPrice) * qty; 
+            calculateGrandTotal(orderIndex); 
         }
 
-        function calculateGrandTotal(orderIndex) {
-            const container = document.getElementById(`order-items-${orderIndex}`);
-            let grandTotal = 0;
-            container.querySelectorAll('.row-price').forEach(el => grandTotal += parseFloat(el.innerText || 0));
-            document.getElementById(`order-total-${orderIndex}`).innerText = grandTotal;
-        }
-
+        function calculateGrandTotal(orderIndex) { const container = document.getElementById(`order-items-${orderIndex}`); let grandTotal = 0; container.querySelectorAll('.row-price').forEach(el => grandTotal += parseFloat(el.innerText || 0)); document.getElementById(`order-total-${orderIndex}`).innerText = grandTotal; }
+        
         function submitOrderBuilder(timestamp, userId, orderIndex) {
             const container = document.getElementById(`order-items-${orderIndex}`);
             const rows = container.querySelectorAll('.builder-row'); 
@@ -521,7 +478,6 @@
                 const qty = parseInt(rows[i].querySelector('.qty-input').value || 1);
                 const basePrice = parseFloat(rows[i].getAttribute('data-unit-price') || 0);
                 
-                // คำนวณตัวบวกฝั่งข้อความสรุปบิลไลน์
                 let extra = 0;
                 let addOnText = "";
                 if (topLayer) {
@@ -537,7 +493,6 @@
                 finalMessage += `- ${displayName} (${sweet}${addOnText}) x ${qty} แก้ว = ${rowTotal} บาท\n`;
                 grandTotal += rowTotal;
 
-                // 💡 แพ็กกล่องข้อมูลส่งทะลุท่อให้เสถียร รองรับทั้งหวานและกลุ่มท็อปปิ้ง
                 loyversePayload.push({ 
                     name: loyverseName, 
                     sweetness: sweet, 
@@ -554,170 +509,8 @@
             processOrder(timestamp, userId, finalMessage, 'approve', jsonString); 
         }
 
-        async function processOrder(timestamp, userId, message, action, jsonData = "") {
-            try {
-                document.body.style.cursor = 'wait';
-                await fetch(API_URL, { 
-                    method: "POST", 
-                    body: JSON.stringify({ action: action, timestamp: timestamp, userId: userId, message: message, jsonData: jsonData }) 
-                });
-                fetchOrders(); 
-            } catch (error) { alert("Error processing request."); } 
-            finally { document.body.style.cursor = 'default'; }
-        }
-       async function retryAI(timestamp) {
-            try {
-                document.body.style.cursor = 'wait';
-                await fetch(API_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "retry_ai", timestamp: timestamp })
-                });
-                fetchOrders(); // รีเฟรชหน้าจอเมื่อ AI อ่านเสร็จ
-            } catch (error) { alert("🚨 เกิดข้อผิดพลาดในการสั่ง AI: " + error.message); }
-            finally { document.body.style.cursor = 'default'; }
-        }
-        async function fetchMenu() {
-            const container = document.getElementById('menu-container');
-            container.innerHTML = '<p style="text-align: center; color: #726E68;">กำลังโหลดข้อมูลเมนู...</p>';
-            try {
-                const response = await fetch(API_URL + "?action=get_menu");
-                const menus = await response.json();
-                container.innerHTML = '<h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #45423E; padding-bottom: 10px; color: var(--col-accent);"><i class="ph-bold ph-coffee"></i> จัดการเปิด-ปิดเมนู</h3>';
-                menus.forEach((menu, index) => {
-                    if(!menu[2]) return;
-                    const menuName = menu[2]; 
-                    const displayName = menu[1] ? menu[1] : menu[2]; 
-                    const isChecked = (menu[5] !== "OFF" && menu[5] !== "หมด") ? "checked" : "";
-                    
-                    let safeMenuName = menuName.split("'").join("\\'");
-
-                    container.innerHTML += `
-                        <div class="switch-wrapper switch-mini">
-                            <span class="switch-label" style="font-size: 13px; font-weight: 500;">${displayName}</span>
-                            <div class="toggle-switch">
-                                <input class="toggle-input" id="menu-toggle-${index}" type="checkbox" ${isChecked} onchange="toggleMenuStatus('${safeMenuName}', this.checked)">
-                                <label class="toggle-label" for="menu-toggle-${index}"></label>
-                            </div>
-                        </div>
-                    `;
-                });
-            } catch (error) { container.innerHTML = `<p style="text-align: center; color: var(--col-danger);">เกิดข้อผิดพลาดในการโหลดเมนู</p>`; }
-        }
-
-        async function toggleMenuStatus(menuName, isChecked) {
-            const status = isChecked ? "ON" : "OFF";
-            try { await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "toggle_menu", menuName: menuName, status: status }) }); } 
-            catch(e) { console.error("Failed to update menu status"); }
-        }
-
-        async function toggleAutoReply() {
-            const status = document.getElementById('auto-reply-toggle').checked ? "ON" : "OFF";
-            try { await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "toggle_auto_reply", status: status }) }); } 
-            catch (error) {}
-        }
-
-                async function saveStoreSettings() {
-            try {
-                document.body.style.cursor = 'wait';
-                await fetch(API_URL, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        action: "update_settings",
-                        openTime: document.getElementById('set-open').value,
-                        closeTime: document.getElementById('set-close').value,
-                        closeDay: document.getElementById('set-dayoff').value,
-                        holidayStart: document.getElementById('set-holiday-start').value,
-                        holidayEnd: document.getElementById('set-holiday-end').value
-                    })
-                });
-                alert("✅ บันทึกเวลาเปิด-ปิดร้านเรียบร้อยแล้ว!");
-            } catch (error) { 
-                alert("🚨 เกิดข้อผิดพลาดในการบันทึก"); 
-                console.error(error);
-            } finally { 
-                document.body.style.cursor = 'default'; 
-            }
-        }
-
-
-        async function fetchFaq() {
-            const container = document.getElementById('faq-container');
-            container.innerHTML = '<p style="text-align: center; color: #726E68;">กำลังโหลดข้อมูล...</p>';
-            try {
-                const response = await fetch(API_URL + "?action=get_faq");
-                const faqs = await response.json();
-                container.innerHTML = '';
-                if (faqs.length === 0) { addFaqRow('', ''); } 
-                else {
-                    faqs.forEach(faq => { if(faq[0] !== "" || faq[1] !== "") addFaqRow(faq[0], faq[1]); });
-                }
-            } catch(e) { container.innerHTML = '<p style="text-align: center; color: var(--col-danger);">โหลดข้อมูลไม่สำเร็จ</p>'; }
-        }
-
-        function addFaqRow(topic, answer) {
-            const container = document.getElementById('faq-container');
-            const rowId = 'faq-' + Date.now() + Math.floor(Math.random() * 1000);
-            
-            let safeTopic = topic.split('"').join('&quot;');
-            let safeAnswer = answer.split('<').join('&lt;').split('>').join('&gt;');
-
-            const html = `
-                <div id="${rowId}" style="background: var(--bg-main); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #45423E; position: relative; width: 100%; box-sizing: border-box;">
-                    <button onclick="document.getElementById('${rowId}').remove()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--col-danger); cursor: pointer; padding: 5px; font-size: 18px;">
-                        <i class="ph-bold ph-trash"></i>
-                    </button>
-                    <div class="setting-group" style="margin-bottom: 10px; padding-right: 30px;">
-                        <label class="setting-label">หัวข้อ / คำถาม (Topic)</label>
-                        <input type="text" class="faq-topic setting-input" value="${safeTopic}" placeholder="เช่น Delivery, เวลาปิด">
-                    </div>
-                    <div class="setting-group" style="margin-bottom: 0;">
-                        <label class="setting-label">คำตอบสำหรับ AI (Answer)</label>
-                        <textarea class="faq-answer setting-input" rows="3" placeholder="คำตอบที่ต้องการให้ AI แจ้งลูกค้า..." style="resize: vertical;">${safeAnswer}</textarea>
-                    </div>
-                </div>
-            `;
-            const loadingText = container.querySelector('p');
-            if(loadingText) loadingText.remove();
-            container.insertAdjacentHTML('beforeend', html);
-        }
-
-        async function saveFaq() {
-            const topics = document.querySelectorAll('.faq-topic');
-            const answers = document.querySelectorAll('.faq-answer');
-            let faqData = [];
-            for(let i = 0; i < topics.length; i++) {
-                const t = topics[i].value.trim();
-                const a = answers[i].value.trim();
-                if(t || a) faqData.push([t, a]);
-            }
-            if(faqData.length === 0) faqData = [["", ""]];
-            try {
-                document.body.style.cursor = 'wait';
-                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "update_faq", faqData: faqData }) });
-                alert("✅ บันทึก FAQ เรียบร้อยแล้ว! สมอง AI อัปเดตข้อมูลแล้วครับ");
-            } catch(e) { alert("🚨 เกิดข้อผิดพลาดในการบันทึก"); } 
-            finally { document.body.style.cursor = 'default'; }
-        }
-
-        function setTemplate(text) { document.getElementById('broadcast-msg').value = text; }
-
-        async function sendBroadcast() {
-            const msg = document.getElementById('broadcast-msg').value.trim();
-            if (!msg) return alert("⚠️ กรุณาพิมพ์ข้อความที่ต้องการส่งก่อนครับ");
-            if (!confirm("คุณแน่ใจหรือไม่ว่าจะส่งข้อความนี้หาลูกค้าทุกคน?")) return;
-            try {
-                document.body.style.cursor = 'wait';
-                const response = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "broadcast_message", message: msg }) });
-                
-                // 🛠️ ปรับแก้ให้อ่านค่า text แทน json ชั่วคราวเพื่อเลี่ยงบั๊กขาดีดคำว่า "OK" ของ Apps Script
-                const textResult = await response.text();
-                if (textResult.includes("OK") || textResult.includes("success")) {
-                    alert(`✅ ส่งข้อความประกาศหาลูกค้าสำเร็จเรียบร้อยแล้วครับบอส!`);
-                    document.getElementById('broadcast-msg').value = ''; 
-                } else { alert("🚨 เกิดข้อผิดพลาดในการส่ง: " + textResult); }
-            } catch (error) { alert("🚨 เกิดข้อผิดพลาดในการเชื่อมต่อ"); } 
-            finally { document.body.style.cursor = 'default'; }
-        }
+        async function processOrder(timestamp, userId, message, action, jsonData = "") { try { document.body.style.cursor = 'wait'; await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: action, timestamp: timestamp, userId: userId, message: message, jsonData: jsonData }) }); fetchOrders(); } catch (error) { alert("Error"); } finally { document.body.style.cursor = 'default'; } }
+        async function retryAI(timestamp) { try { document.body.style.cursor = 'wait'; await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "retry_ai", timestamp: timestamp }) }); fetchOrders(); } catch (error) { alert("🚨 เกิดข้อผิดพลาดในการสั่ง AI: " + error.message); } finally { document.body.style.cursor = 'default'; } }
     </script>
 </body>
 </html>
