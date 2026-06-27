@@ -68,16 +68,12 @@
         .save-btn { width: 100%; background-color: var(--col-accent); color: var(--text-dark); padding: 14px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 14px;}
         .save-btn:hover { opacity: 0.9; transform: scale(0.98); }
 
-        /* ========================================= */
-        /* 🎨 ส่วนตกแต่งเพิ่มเติมสำหรับ Order Builder */
-        /* ========================================= */
         .builder-box { background: #2A2826; padding: 15px; border-radius: 12px; border: 1px solid #45423E; margin-bottom: 15px; }
         .builder-row { display: flex; gap: 8px; align-items: center; background: var(--bg-main); padding: 10px; border-radius: 8px; border: 1px solid #33312F; margin-bottom: 8px; flex-direction: column; align-items: stretch; }
         .builder-input { width: 100%; padding: 8px; border-radius: 6px; background: #1C1A19; color: var(--col-accent); border: 1px solid #45423E; font-family: inherit; font-size: 13px; }
         .builder-input:focus { outline: none; border-color: var(--col-accent); }
         .total-section { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px dashed #45423E; padding-top: 15px; }
         
-        /* 🍬 ปุ่มเลือกระดับความหวาน 7 ระดับ */
         .sweet-group { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; justify-content: center; }
         .sweet-btn { padding: 6px 4px; font-size: 11px; border: 1px solid #45423E; background: #1C1A19; color: var(--text-muted); border-radius: 6px; cursor: pointer; transition: all 0.2s; font-family: inherit; flex: 1 1 calc(14% - 4px); text-align: center; white-space: nowrap; }
         .sweet-btn:hover { border-color: #726E68; }
@@ -203,6 +199,7 @@
     <button class="refresh-btn" onclick="refreshCurrentTab()"><i class="ph-bold ph-arrows-clockwise"></i></button>
 
     <script>
+        // 🚨 อย่าลืมใส่ Web App URL ของบอสนะครับ 🚨
         const API_URL = "https://script.google.com/macros/s/AKfycbxluWmUrmclY2m-GzEi3zUfyNfXFOnx4THYfj3wTavYTa8pr7q3hppcpg_Tx7s-iyhw/exec";
         let currentTab = 'drafts';
         let globalMenus = []; 
@@ -511,6 +508,136 @@
 
         async function processOrder(timestamp, userId, message, action, jsonData = "") { try { document.body.style.cursor = 'wait'; await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: action, timestamp: timestamp, userId: userId, message: message, jsonData: jsonData }) }); fetchOrders(); } catch (error) { alert("Error"); } finally { document.body.style.cursor = 'default'; } }
         async function retryAI(timestamp) { try { document.body.style.cursor = 'wait'; await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "retry_ai", timestamp: timestamp }) }); fetchOrders(); } catch (error) { alert("🚨 เกิดข้อผิดพลาดในการสั่ง AI: " + error.message); } finally { document.body.style.cursor = 'default'; } }
+        
+        async function fetchMenu() {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = '<p style="text-align: center; color: #726E68;">กำลังโหลดข้อมูลเมนู...</p>';
+            try {
+                const response = await fetch(API_URL + "?action=get_menu");
+                const menus = await response.json();
+                container.innerHTML = '<h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #45423E; padding-bottom: 10px; color: var(--col-accent);"><i class="ph-bold ph-coffee"></i> จัดการเปิด-ปิดเมนู</h3>';
+                menus.forEach((menu, index) => {
+                    if(!menu[2]) return;
+                    const menuName = menu[2]; 
+                    const displayName = menu[1] ? menu[1] : menu[2]; 
+                    const isChecked = (menu[5] !== "OFF" && menu[5] !== "หมด") ? "checked" : "";
+                    let safeMenuName = menuName.split("'").join("\\'");
+                    container.innerHTML += `
+                        <div class="switch-wrapper switch-mini">
+                            <span class="switch-label" style="font-size: 13px; font-weight: 500;">${displayName}</span>
+                            <div class="toggle-switch">
+                                <input class="toggle-input" id="menu-toggle-${index}" type="checkbox" ${isChecked} onchange="toggleMenuStatus('${safeMenuName}', this.checked)">
+                                <label class="toggle-label" for="menu-toggle-${index}"></label>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) { container.innerHTML = `<p style="text-align: center; color: var(--col-danger);">เกิดข้อผิดพลาดในการโหลดเมนู</p>`; }
+        }
+
+        async function toggleMenuStatus(menuName, isChecked) {
+            const status = isChecked ? "ON" : "OFF";
+            try { await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "toggle_menu", menuName: menuName, status: status }) }); } 
+            catch(e) { console.error("Failed to update menu status"); }
+        }
+
+        async function toggleAutoReply() {
+            const status = document.getElementById('auto-reply-toggle').checked ? "ON" : "OFF";
+            try { await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "toggle_auto_reply", status: status }) }); } 
+            catch (error) {}
+        }
+
+        async function saveStoreSettings() {
+            try {
+                document.body.style.cursor = 'wait';
+                await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "update_settings",
+                        openTime: document.getElementById('set-open').value,
+                        closeTime: document.getElementById('set-close').value,
+                        closeDay: document.getElementById('set-dayoff').value,
+                        holidayStart: document.getElementById('set-holiday-start').value,
+                        holidayEnd: document.getElementById('set-holiday-end').value
+                    })
+                });
+                alert("✅ บันทึกเวลาเปิด-ปิดร้านเรียบร้อยแล้ว!");
+            } catch (error) { 
+                alert("🚨 เกิดข้อผิดพลาดในการบันทึก"); 
+                console.error(error);
+            } finally { document.body.style.cursor = 'default'; }
+        }
+
+        async function fetchFaq() {
+            const container = document.getElementById('faq-container');
+            container.innerHTML = '<p style="text-align: center; color: #726E68;">กำลังโหลดข้อมูล...</p>';
+            try {
+                const response = await fetch(API_URL + "?action=get_faq");
+                const faqs = await response.json();
+                container.innerHTML = '';
+                if (faqs.length === 0) { addFaqRow('', ''); } 
+                else { faqs.forEach(faq => { if(faq[0] !== "" || faq[1] !== "") addFaqRow(faq[0], faq[1]); }); }
+            } catch(e) { container.innerHTML = '<p style="text-align: center; color: var(--col-danger);">โหลดข้อมูลไม่สำเร็จ</p>'; }
+        }
+
+        function addFaqRow(topic, answer) {
+            const container = document.getElementById('faq-container');
+            const rowId = 'faq-' + Date.now() + Math.floor(Math.random() * 1000);
+            let safeTopic = topic.split('"').join('&quot;');
+            let safeAnswer = answer.split('<').join('&lt;').split('>').join('&gt;');
+            const html = `
+                <div id="${rowId}" style="background: var(--bg-main); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #45423E; position: relative; width: 100%; box-sizing: border-box;">
+                    <button onclick="document.getElementById('${rowId}').remove()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--col-danger); cursor: pointer; padding: 5px; font-size: 18px;"><i class="ph-bold ph-trash"></i></button>
+                    <div class="setting-group" style="margin-bottom: 10px; padding-right: 30px;">
+                        <label class="setting-label">หัวข้อ / คำถาม (Topic)</label>
+                        <input type="text" class="faq-topic setting-input" value="${safeTopic}" placeholder="เช่น Delivery, เวลาปิด">
+                    </div>
+                    <div class="setting-group" style="margin-bottom: 0;">
+                        <label class="setting-label">คำตอบสำหรับ AI (Answer)</label>
+                        <textarea class="faq-answer setting-input" rows="3" placeholder="คำตอบที่ต้องการให้ AI แจ้งลูกค้า..." style="resize: vertical;">${safeAnswer}</textarea>
+                    </div>
+                </div>
+            `;
+            const loadingText = container.querySelector('p');
+            if(loadingText) loadingText.remove();
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        async function saveFaq() {
+            const topics = document.querySelectorAll('.faq-topic');
+            const answers = document.querySelectorAll('.faq-answer');
+            let faqData = [];
+            for(let i = 0; i < topics.length; i++) {
+                const t = topics[i].value.trim();
+                const a = answers[i].value.trim();
+                if(t || a) faqData.push([t, a]);
+            }
+            if(faqData.length === 0) faqData = [["", ""]];
+            try {
+                document.body.style.cursor = 'wait';
+                await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "update_faq", faqData: faqData }) });
+                alert("✅ บันทึก FAQ เรียบร้อยแล้ว! สมอง AI อัปเดตข้อมูลแล้วครับ");
+            } catch(e) { alert("🚨 เกิดข้อผิดพลาดในการบันทึก"); } 
+            finally { document.body.style.cursor = 'default'; }
+        }
+
+        function setTemplate(text) { document.getElementById('broadcast-msg').value = text; }
+
+        async function sendBroadcast() {
+            const msg = document.getElementById('broadcast-msg').value.trim();
+            if (!msg) return alert("⚠️ กรุณาพิมพ์ข้อความที่ต้องการส่งก่อนครับ");
+            if (!confirm("คุณแน่ใจหรือไม่ว่าจะส่งข้อความนี้หาลูกค้าทุกคน?")) return;
+            try {
+                document.body.style.cursor = 'wait';
+                const response = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "broadcast_message", message: msg }) });
+                const textResult = await response.text();
+                if (textResult.includes("OK") || textResult.includes("success")) {
+                    alert(`✅ ส่งข้อความประกาศหาลูกค้าสำเร็จเรียบร้อยแล้วครับบอส!`);
+                    document.getElementById('broadcast-msg').value = ''; 
+                } else { alert("🚨 เกิดข้อผิดพลาดในการส่ง: " + textResult); }
+            } catch (error) { alert("🚨 เกิดข้อผิดพลาดในการเชื่อมต่อ"); } 
+            finally { document.body.style.cursor = 'default'; }
+        }
     </script>
 </body>
 </html>
