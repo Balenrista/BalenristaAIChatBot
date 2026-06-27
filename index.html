@@ -596,24 +596,29 @@
             catch (error) {}
         }
 
-        async function saveStoreSettings() {
+                async function saveStoreSettings() {
             try {
                 document.body.style.cursor = 'wait';
-                                        body: JSON.stringify({
-                            action: "update_settings",
-                            openTime: document.getElementById('set-open').value,
-                            closeTime: document.getElementById('set-close').value,
-                            closeDay: document.getElementById('set-dayoff').value,
-                            holidayStart: document.getElementById('set-holiday-start').value,
-                            holidayEnd: document.getElementById('set-holiday-end').value
-                        })
-
+                await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "update_settings",
+                        openTime: document.getElementById('set-open').value,
+                        closeTime: document.getElementById('set-close').value,
+                        closeDay: document.getElementById('set-dayoff').value,
+                        holidayStart: document.getElementById('set-holiday-start').value,
+                        holidayEnd: document.getElementById('set-holiday-end').value
                     })
                 });
                 alert("✅ บันทึกเวลาเปิด-ปิดร้านเรียบร้อยแล้ว!");
-            } catch (error) { alert("🚨 เกิดข้อผิดพลาดในการบันทึก"); } 
-            finally { document.body.style.cursor = 'default'; }
+            } catch (error) { 
+                alert("🚨 เกิดข้อผิดพลาดในการบันทึก"); 
+                console.error(error);
+            } finally { 
+                document.body.style.cursor = 'default'; 
+            }
         }
+
 
         async function fetchFaq() {
             const container = document.getElementById('faq-container');
