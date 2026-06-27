@@ -205,7 +205,7 @@
 
     <script>
         // 🚨 สำคัญมาก: ใส่ Web App URL ของคุณไว้ที่บรรทัดนี้ 🚨
-        const API_URL = "https://script.google.com/macros/s/AKfycbzpup9IejeS30BPGapDd46YbvIDM6oMBdFKKFRpom_iJkSjMUjiUS0myrkK_aEQtdaOBA/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbxXm-ZYR-3IZHT8v5DFY_6ekyHA6BBbF5RguXcI_rpX0VQCz_9cxpiGsPKxwpMSddIrOQ/exec";
 
         let currentTab = 'drafts';
         let globalMenus = []; 
@@ -297,9 +297,20 @@
 
                     let isOrder = aiData.autoFillItems.length > 0 || messageInStr.includes('[รูปภาพกระดาษออเดอร์]') || messageInStr.includes('ออเดอร์') || messageInStr.includes('สั่ง') || messageInStr.includes('เอา');
 
+                    // 💡 ส่วนที่เพิ่มใหม่: แถบแสดงชื่อลูกค้าและเวลาที่สั่ง
+                    let custNameDisplay = order.userName ? order.userName : "ลูกค้าแชทไลน์";
+                    let timeDisplay = new Date(order.timestamp).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
+                    
+                    let cardHeaderHtml = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed #45423E; padding-bottom: 10px;">
+                            <div style="font-size: 16px; font-weight: 700; color: #4CAF50;"><i class="ph-fill ph-user-circle"></i> คุณ: ${custNameDisplay}</div>
+                            <div style="font-size: 12px; color: var(--text-muted);"><i class="ph-bold ph-clock"></i> ${timeDisplay} น.</div>
+                        </div>
+                    `;
+
                     if (isOrder) {
-                        card.innerHTML = `
-                            <div class="message-box"><strong><i class="ph-fill ph-user"></i> ลูกค้าส่งมา:</strong>${messageInStr}</div>
+                        card.innerHTML = cardHeaderHtml + `
+                            <div class="message-box" style="margin-top: 0;"><strong><i class="ph-fill ph-chat-text"></i> ลูกค้าส่งมา:</strong>${messageInStr}</div>
                             <div class="message-box" style="margin-bottom: 10px; border-left-color: ${isAlert ? 'var(--col-danger)' : 'var(--col-accent)'}; background-color: ${isAlert ? '#241111' : 'var(--bg-main)'};">
                                 <strong><i class="ph-fill ph-sparkle"></i> ข้อมูลที่ AI วิเคราะห์ได้ (ใช้อ้างอิง):</strong>
                                 ${alertBadge}
@@ -339,8 +350,8 @@
                         }
                         
                     } else {
-                        card.innerHTML = `
-                            <div class="message-box"><strong><i class="ph-fill ph-user"></i> ลูกค้าส่งมา:</strong>${messageInStr}</div>
+                        card.innerHTML = cardHeaderHtml + `
+                            <div class="message-box" style="margin-top: 0;"><strong><i class="ph-fill ph-chat-text"></i> ลูกค้าส่งมา:</strong>${messageInStr}</div>
                             <div class="message-box" style="margin-bottom: 0; border-left-color: ${isAlert ? 'var(--col-danger)' : 'var(--col-accent)'};">
                                 <strong><i class="ph-fill ph-sparkle"></i> AI ร่างคำตอบ (แอดมินแก้ไขได้ ✏️):</strong>
                                 ${alertBadge}
