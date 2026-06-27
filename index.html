@@ -149,10 +149,22 @@
                     <option value="เสาร์">วันเสาร์</option>
                     <option value="อาทิตย์">วันอาทิตย์</option>
                 </select>
+                        </div>
+
+            <div class="setting-group" style="margin-top: 15px;">
+                <label class="setting-label">วันหยุดพิเศษ (ช่วงเทศกาล วว/ดด/ปปปป)</label>
+                <div class="row-container">
+                    <div class="column-cell">
+                        <input type="text" id="set-holiday-start" class="setting-input" placeholder="เริ่ม เช่น 13/04/2026">
+                    </div>
+                    <div class="column-cell">
+                        <input type="text" id="set-holiday-end" class="setting-input" placeholder="สิ้นสุด เช่น 17/04/2026">
+                    </div>
+                </div>
             </div>
             
-            <div class="setting-group"><label class="setting-label">วันหยุดพิเศษ (วว/ดด/ปปปป)</label><input type="text" id="set-holiday" class="setting-input" placeholder="เช่น 13/04/2026"></div>
             <button class="save-btn" onclick="saveStoreSettings()"><i class="ph-bold ph-floppy-disk"></i> บันทึกการตั้งค่าร้าน</button>
+
         </div>
     </div>
 
@@ -193,7 +205,7 @@
 
     <script>
         // 🚨 สำคัญมาก: ใส่ Web App URL ของคุณไว้ที่บรรทัดนี้ 🚨
-        const API_URL = "https://script.google.com/macros/s/AKfycbwyBxpu72FtWJmC3yHR0C7mLRvc6ofY6Tjc_ozXCeTMhlS2OuhSl9n_BfCin2pj28qvXw/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbx1UXGraJCvQFgS7j7Fe-BcbPv511UN7sFLRNRiwj_ABcua8mvDYiVh4bHo7Rt0_GSfUQ/exec";
 
         let currentTab = 'drafts';
         let globalMenus = []; 
@@ -587,14 +599,15 @@
         async function saveStoreSettings() {
             try {
                 document.body.style.cursor = 'wait';
-                await fetch(API_URL, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        action: "update_settings",
-                        openTime: document.getElementById('set-open').value,
-                        closeTime: document.getElementById('set-close').value,
-                        closeDay: document.getElementById('set-dayoff').value,
-                        specialHolidays: document.getElementById('set-holiday').value
+                                        body: JSON.stringify({
+                            action: "update_settings",
+                            openTime: document.getElementById('set-open').value,
+                            closeTime: document.getElementById('set-close').value,
+                            closeDay: document.getElementById('set-dayoff').value,
+                            holidayStart: document.getElementById('set-holiday-start').value,
+                            holidayEnd: document.getElementById('set-holiday-end').value
+                        })
+
                     })
                 });
                 alert("✅ บันทึกเวลาเปิด-ปิดร้านเรียบร้อยแล้ว!");
