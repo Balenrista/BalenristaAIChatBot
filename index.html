@@ -205,7 +205,7 @@
 
     <script>
         // 🚨 สำคัญมาก: ใส่ Web App URL ของคุณไว้ที่บรรทัดนี้ 🚨
-        const API_URL = "https://script.google.com/macros/s/AKfycby9lYIFqjjjltkkw6pOtfgrdMjqbe07pOZ1TL0CRN8WCtzgllFFZwROpNA8PtuRPknzOw/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbx-GB4ZiMZS1YmR-jlcqPsWXpGczH6p-MGhOQd3l7kxcLC-qk8xWhPnZKojcT1bqyAOtQ/exec";
 
         let currentTab = 'drafts';
         let globalMenus = []; 
@@ -326,6 +326,7 @@
                             </div>
 
                             <div class="button-group">
+                                ${isAlert ? `<button class="action-btn" style="background-color: #E67E22; color: #fff; border: none; flex: 1.5;" onclick="retryAI('${order.timestamp}')"><i class="ph-bold ph-arrows-clockwise"></i> สั่ง AI อ่านใหม่</button>` : ''}
                                 <button class="action-btn approve-btn" onclick="submitOrderBuilder('${order.timestamp}', '${order.userId}', ${index})"><i class="ph-bold ph-check-circle"></i> ยืนยัน & ส่งบิล</button>
                                 <button class="action-btn reject-btn" onclick="processOrder('${order.timestamp}', null, null, 'reject')"><i class="ph-bold ph-trash"></i> ลบทิ้ง</button>
                             </div>
@@ -355,6 +356,7 @@
                                 <textarea id="draft-text-${index}" class="editable-draft-box" rows="5" style="${isAlert ? 'border: 2px solid var(--col-danger); background-color: #241111;' : ''}">${cleanDraftText}</textarea>
                             </div>
                             <div class="button-group">
+                                ${isAlert ? `<button class="action-btn" style="background-color: #E67E22; color: #fff; border: none; flex: 1.5;" onclick="retryAI('${order.timestamp}')"><i class="ph-bold ph-arrows-clockwise"></i> สั่ง AI อ่านใหม่</button>` : ''}
                                 <button class="action-btn approve-btn" onclick="const msg = document.getElementById('draft-text-${index}').value; processOrder('${order.timestamp}', '${order.userId}', msg, 'approve')"><i class="ph-bold ph-paper-plane-tilt"></i> ส่งข้อความ</button>
                                 <button class="action-btn reject-btn" onclick="processOrder('${order.timestamp}', null, null, 'reject')"><i class="ph-bold ph-trash"></i> ลบทิ้ง</button>
                             </div>
@@ -563,7 +565,17 @@
             } catch (error) { alert("Error processing request."); } 
             finally { document.body.style.cursor = 'default'; }
         }
-
+       async function retryAI(timestamp) {
+            try {
+                document.body.style.cursor = 'wait';
+                await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "retry_ai", timestamp: timestamp })
+                });
+                fetchOrders(); // รีเฟรชหน้าจอเมื่อ AI อ่านเสร็จ
+            } catch (error) { alert("🚨 เกิดข้อผิดพลาดในการสั่ง AI: " + error.message); }
+            finally { document.body.style.cursor = 'default'; }
+        }
         async function fetchMenu() {
             const container = document.getElementById('menu-container');
             container.innerHTML = '<p style="text-align: center; color: #726E68;">กำลังโหลดข้อมูลเมนู...</p>';
