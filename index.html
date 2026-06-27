@@ -205,7 +205,7 @@
 
     <script>
         // 🚨 สำคัญมาก: ใส่ Web App URL ของคุณไว้ที่บรรทัดนี้ 🚨
-        const API_URL = "https://script.google.com/macros/s/AKfycbxhNFJNror0QXeb5LqcgYWNOOCJ_cR731r0MBMQoWa-mL4EMKvaxRjOybD_la2aFYQ-rw/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycby9lYIFqjjjltkkw6pOtfgrdMjqbe07pOZ1TL0CRN8WCtzgllFFZwROpNA8PtuRPknzOw/exec";
 
         let currentTab = 'drafts';
         let globalMenus = []; 
@@ -239,18 +239,15 @@
             if (!rawText) return result;
             
             let str = String(rawText);
-            let lowerStr = str.toLowerCase();
-            let startIdx = lowerStr.indexOf('```json');
+            // 💡 สกัดจับ JSON ทั้งแบบมีกรอบ ```json และแบบไม่มีกรอบเผื่อ AI ลืมใส่
+            let jsonMatch = str.match(/```json([\s\S]*?)```/i) || str.match(/\[\s*\{[\s\S]*?\}\s*\]/);
 
-            if (startIdx !== -1) {
-                let endIdx = str.indexOf('```', startIdx + 7);
-                if (endIdx !== -1) {
-                    let jsonText = str.substring(startIdx + 7, endIdx).trim();
-                    try {
-                        result.autoFillItems = JSON.parse(jsonText);
-                        result.displayText = str.split(str.substring(startIdx, endIdx + 3)).join('').trim();
-                    } catch (e) { console.error("Parse JSON Error:", e); }
-                }
+            if (jsonMatch) {
+                try {
+                    let jsonText = jsonMatch[0].replace(/```json/i, "").replace(/```/g, "").trim();
+                    result.autoFillItems = JSON.parse(jsonText);
+                    result.displayText = str.replace(jsonMatch[0], "").trim();
+                } catch (e) { console.error("Parse JSON Error:", e); }
             }
             return result;
         }
