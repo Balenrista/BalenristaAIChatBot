@@ -392,7 +392,7 @@
   </div>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx3-Ihmnm-j6jquMN0S8P8n4cdAQ3ivwssLycZzanYqhnYwMCTBxjd_xdepaYXad3CFaw/exec"; 
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz22XrQmWbjdTHk9teJr3ragx2oUZz9Yxka0PAPuAq_77pG9rmR_Eiq6CIwOkTHjZaU8g/exec"; 
 
     let allMenus = []; 
     let cart = []; 
@@ -603,7 +603,7 @@
           topLayerPrice: currentOptions.topLayerPrice,
           delicious: currentOptions.delicious,
           deliciousPrice: currentOptions.deliciousPrice,
-          icePack: currentOptions.icePack,
+          packaging: currentOptions.icePack,
           qty: 1
         });
       }
@@ -655,7 +655,7 @@
         let details = `ความหวาน: ${item.sweetness}`;
         if (item.topLayer) details += `<br>Top Layer: ${item.topLayer} ${item.topLayerPrice > 0 ? '(+'+item.topLayerPrice+'฿)' : ''}`;
         if (item.delicious) details += `<br>เพิ่มความอร่อย: ${item.delicious} ${item.deliciousPrice > 0 ? '(+'+item.deliciousPrice+'฿)' : ''}`;
-        if (item.icePack) details += `<br>การบรรจุ: ${item.icePack}`;
+        if (item.packaging) details += `<br>การบรรจุ: ${item.packaging}`;
 
         const row = document.createElement('div');
         row.className = 'cart-item-row';
