@@ -82,6 +82,30 @@
         .sweet-btn { padding: 6px 4px; font-size: 11px; border: 1px solid #45423E; background: #1C1A19; color: var(--text-muted); border-radius: 6px; cursor: pointer; transition: all 0.2s; font-family: inherit; flex: 1 1 calc(14% - 4px); text-align: center; white-space: nowrap; }
         .sweet-btn:hover { border-color: #726E68; }
         .sweet-btn.active { background: var(--col-accent); color: var(--text-dark); border-color: var(--col-accent); font-weight: 700; box-shadow: 0 2px 8px rgba(183, 180, 174, 0.3); }
+          /* 🌟 ปุ่มล้างออเดอร์ (ลอยอยู่เหนือปุ่มรีเฟรช) */
+  .floating-clear-btn {
+    position: fixed;
+    bottom: 100px; /* ขยับขึ้นมาไม่ให้ทับปุ่มรีเฟรชเดิม */
+    right: 35px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #2A2826; 
+    color: #ff4d4d; /* สีแดงให้เข้ากับธีม */
+    border: 1px solid #45423E; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    transition: all 0.3s ease;
+  }
+  .floating-clear-btn:hover {
+    background-color: #371E1E;
+    transform: scale(1.1);
+  }
+
     </style>
 </head>
 <body>
@@ -201,10 +225,13 @@
     </div>
 
     <button class="refresh-btn" onclick="refreshCurrentTab()"><i class="ph-bold ph-arrows-clockwise"></i></button>
+        <button type="button" onclick="clearAdminOrders()" class="floating-clear-btn" title="ล้างออเดอร์ทั้งหมด">
+        <i class="ph-bold ph-trash" style="font-size: 22px;"></i>
+    </button>
 
     <script>
         // 🚨 สำคัญมาก: เปลี่ยนเป็น Web App URL ของบอสด้วยนะครับ 🚨
-        const API_URL = "https://script.google.com/macros/s/AKfycbx3-Ihmnm-j6jquMN0S8P8n4cdAQ3ivwssLycZzanYqhnYwMCTBxjd_xdepaYXad3CFaw/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbxtdKdnQdEzkkPhQT6rzyAua8MrPte5RiflOrmVfhJYTpSoIaPUM4fNS1WT0rQjkJ3pQg/exec";
         
         let currentTab = 'drafts';
         let globalMenus = []; 
@@ -694,6 +721,33 @@
             } catch (error) { alert("🚨 เกิดข้อผิดพลาดในการเชื่อมต่อ"); } 
             finally { document.body.style.cursor = 'default'; }
         }
+                // 🌟 ฟังก์ชันล้างออเดอร์ทั้งหมด
+        function clearAdminOrders() {
+            if (confirm("บอสแน่ใจไหมครับที่จะล้างออเดอร์ทั้งหมด? (ข้อมูลในชีต Drafts จะหายไปเลยนะ)")) {
+                document.body.style.cursor = 'wait';
+                // สังเกตว่าผมเปลี่ยนให้ใช้ตัวแปร API_URL ตามโค้ดของบอสแล้วครับ
+                fetch(API_URL, { 
+                    method: "POST",
+                    body: JSON.stringify({ action: "clear_all_orders" })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.body.style.cursor = 'default';
+                    if (data.status === "success") {
+                        alert("เคลียร์ออเดอร์เรียบร้อยครับบอส!");
+                        location.reload(); 
+                    } else {
+                        alert("ระบบขัดข้อง: " + data.message);
+                    }
+                })
+                .catch(err => {
+                    document.body.style.cursor = 'default';
+                    console.error(err);
+                    alert("ติดต่อฐานข้อมูลไม่ได้ครับ");
+                });
+            }
+        }
+
     </script>
 </body>
 </html>
