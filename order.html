@@ -862,7 +862,7 @@
                 if(item.delicious) details.push(item.delicious);
                 if(item.packaging) details.push(item.packaging);
                 let detailsText = details.join(' | ');
-
+                let totalRowPrice = item.price * item.quantity;
                 return `
                 <div style="padding:10px 0; border-bottom:1px solid #45423E;">
                     <div style="display:flex; justify-content:space-between; font-size:13px;">
