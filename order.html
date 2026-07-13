@@ -854,40 +854,46 @@
             let d = new Date(o.date);
             let items = JSON.parse(o.summary); 
             
+            let grandTotal = 0; // 1. สร้างตัวแปรเก็บยอดรวมทั้งหมดเริ่มที่ 0
+
             let tableRows = items.map(item => {
-    let details = [];
-    if(item.sweetness) details.push(item.sweetness);
-    if(item.topLayer) details.push(item.topLayer);
-    if(item.delicious) details.push(item.delicious);
-    if(item.packaging) details.push(item.packaging);
-    let detailsText = details.join(' | ');
+                let details = [];
+                if(item.sweetness) details.push(item.sweetness);
+                if(item.topLayer) details.push(item.topLayer);
+                if(item.delicious) details.push(item.delicious);
+                if(item.packaging) details.push(item.packaging);
+                let detailsText = details.join(' | ');
 
-    // คำนวณราคารวมต่อแถว (ราคาต่อแก้ว * จำนวน)
-    let totalRowPrice = item.price * item.quantity;
+                let totalRowPrice = item.price * item.quantity;
+                grandTotal += totalRowPrice; // 2. สะสมยอดรวมในทุกๆ รายการ
 
-    return `
-    <div style="padding:10px 0; border-bottom:1px solid #45423E;">
-        <div style="display:flex; justify-content:space-between; font-size:13px;">
-            <div style="font-weight:600; color:#B7B4AE;">${item.name}</div>
-            <div style="color:#4CAF50; font-weight:700;">${item.quantity} x ${item.price}฿ = ${totalRowPrice}฿</div>
-        </div>
-        <div style="font-size:11px; color:#726E68; margin-top:4px;">${detailsText}</div>
-    </div>`;
-}).join('');
+                return `
+                <div style="padding:10px 0; border-bottom:1px solid #45423E;">
+                    <div style="display:flex; justify-content:space-between; font-size:13px;">
+                        <div style="font-weight:600; color:#B7B4AE;">${item.name}</div>
+                        <div style="color:#4CAF50; font-weight:700;">${item.quantity} x ${item.price}฿ = ${totalRowPrice}฿</div>
+                    </div>
+                    <div style="font-size:11px; color:#726E68; margin-top:4px;">${detailsText}</div>
+                </div>`;
+            }).join('');
 
-
+            // 3. ใส่แสดงผลยอดรวมทั้งหมดไว้ท้ายรายการ
             return `
             <div style="background:#2A2826; border-radius:12px; padding:16px; margin-bottom:16px;">
                 <div style="font-size:11px; color:#B7B4AE; margin-bottom:10px; border-bottom:1px dashed #45423E; padding-bottom:5px;">
                     ${d.toLocaleDateString('th-TH')} ${d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}
                 </div>
                 ${tableRows}
+                <div style="text-align:right; margin-top:12px; font-size:14px; font-weight:700; color:#fff;">
+                    ยอดรวมทั้งสิ้น: <span style="color:#4CAF50;">${grandTotal.toLocaleString()}฿</span>
+                </div>
             </div>`;
         }).join('');
     } catch (e) { 
         list.innerHTML = '<div style="text-align:center; color:#ff4d4d; padding: 20px;">ไม่สามารถโหลดประวัติได้</div>'; 
     }
 }
+
 
   </script>
 </body>
