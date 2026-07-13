@@ -255,14 +255,24 @@
     .success-icon-box { font-size: 54px; color: #4CAF50; margin-bottom: 16px; }
     .success-points-display { font-size: 42px; font-weight: 700; color: var(--col-accent); margin: 12px 0 4px 0; font-family: 'Poppins', sans-serif; }
     .success-points-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; }
+        /* 🌟 ปุ่มและหน้าต่าง History (แบบมินิมอล) */
+    .history-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); font-size: 12px; padding: 4px 10px; border-radius: 12px; cursor: pointer; margin-right: 12px; transition: 0.3s; font-family: 'Prompt', sans-serif; }
+    .history-btn:hover { color: var(--col-accent); border-color: var(--col-accent); }
+    .history-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; justify-content: center; align-items: center; }
+    .history-content { background: var(--bg-card); width: 85%; max-width: 400px; max-height: 75vh; border-radius: 20px; padding: 24px; color: var(--col-accent); overflow-y: auto; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+
   </style>
 </head>
 <body>
 
-  <div class="header">
+    <div class="header">
     <span>Balenrista Order Online</span>
-    <span id="headerCartCount" style="font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 6px;"><i class="ph-bold ph-shopping-cart"></i> (0)</span>
+    <div style="display: flex; align-items: center;">
+      <button class="history-btn" onclick="toggleHistory()">History</button>
+      <span id="headerCartCount" style="font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 6px;"><i class="ph-bold ph-shopping-cart"></i> (0)</span>
+    </div>
   </div>
+
 
   <div class="container">
     <div class="alert-banner" id="alertBanner" style="display: none;">
@@ -390,9 +400,17 @@
           </button>
       </div>
   </div>
+  <div id="historyPopup" class="history-overlay" onclick="toggleHistory()">
+      <div class="history-content" onclick="event.stopPropagation()">
+          <h3 style="margin-top: 0; text-align: center; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">Order History</h3>
+          <hr style="border:0; border-top:1px solid var(--border-color); margin: 15px 0;">
+          <div id="historyList">Loading...</div>
+          <button onclick="toggleHistory()" style="margin-top:20px; width:100%; padding:12px; background:var(--bg-main); color:var(--col-accent); border:1px solid var(--border-color); border-radius:var(--border-radius-btn); cursor:pointer; font-weight:700; font-family: 'Prompt', sans-serif;">Close</button>
+      </div>
+  </div>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxtdKdnQdEzkkPhQT6rzyAua8MrPte5RiflOrmVfhJYTpSoIaPUM4fNS1WT0rQjkJ3pQg/exec"; 
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz_WqeONx1G4yRaKglb0yfYijfCSIyXI8C_wPPCX6RpLv91qsRiO3RGlEM19J9K8gyyfg/exec"; 
 
     let allMenus = []; 
     let cart = []; 
@@ -810,6 +828,49 @@
         document.body.style.cursor = 'default';
       });
     }
+        // 🌟 ฟังก์ชันจัดการ Order History
+    function toggleHistory() {
+        const popup = document.getElementById('historyPopup');
+        popup.style.display = (popup.style.display === 'flex') ? 'none' : 'flex';
+        if (popup.style.display === 'flex') loadOrderHistory();
+    }
+
+    async function loadOrderHistory() {
+        const list = document.getElementById('historyList');
+        // ใช้ lineUserId ที่ระบบบอสมีอยู่แล้ว
+        if (!lineUserId || lineUserId === "U_ONLINE_CUSTOMER") { 
+            list.innerHTML = '<div style="text-align:center; color:var(--col-danger); padding: 20px 0;">User ID missing.<br><span style="font-size:11px; color:var(--text-muted);">Please open via LINE.</span></div>'; 
+            return; 
+        }
+        
+        list.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding: 20px 0;">Loading...</div>'; 
+        
+        try {
+            const res = await fetch(WEB_APP_URL + "?action=get_history&userId=" + lineUserId);
+            const data = await res.json();
+            
+            if (data.length === 0) { 
+                list.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding: 20px 0;">No previous orders found.</div>'; 
+                return; 
+            }
+            
+            list.innerHTML = data.map(o => {
+                let d = new Date(o.date);
+                let c = o.status.includes('Approved') ? '#4CAF50' : (o.status.includes('Pending') ? '#f39c12' : 'var(--col-danger)');
+                return `
+                <div style="background:var(--bg-main); border-radius:12px; padding:16px; margin-bottom:12px; border:1px solid var(--border-color); font-size:13px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px dashed var(--border-color); padding-bottom:8px; font-size:11px;">
+                        <span style="color:var(--text-muted);">${d.toLocaleDateString('en-GB')} ${d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span>
+                        <span style="color:${c}; font-weight:bold; margin-left:auto;">${o.status}</span>
+                    </div>
+                    <div style="white-space:pre-wrap; color:var(--col-accent); line-height: 1.5;">${o.summary.replace(/\[ออเดอร์ออนไลน์\]/g, '').trim()}</div>
+                </div>`;
+            }).join('');
+        } catch (e) { 
+            list.innerHTML = '<div style="text-align:center; color:var(--col-danger); padding: 20px 0;">Failed to load.</div>'; 
+        }
+    }
+
   </script>
 </body>
 </html>
