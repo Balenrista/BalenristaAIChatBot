@@ -852,25 +852,31 @@
         
         list.innerHTML = data.map(o => {
             let d = new Date(o.date);
-            // แปลงข้อมูลจาก JSON string ในคอลัมน์ I (Index 8) เป็น Object
             let items = JSON.parse(o.summary); 
             
-            // สร้างตารางมินิมอล
-            let tableRows = items.map(item => `
-                <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #45423E; font-size:13px;">
-                    <div style="flex:2;">${item.name}</div>
-                    <div style="flex:1; text-align:center;">${item.quantity}</div>
-                    <div style="flex:1; text-align:right;">${item.price}</div>
-                </div>
-            `).join('');
+            let tableRows = items.map(item => {
+                // สร้างบรรทัดรายละเอียดตัวเลือกเสริม
+                let details = [];
+                if(item.sweetness) details.push(item.sweetness);
+                if(item.topLayer) details.push(item.topLayer);
+                if(item.delicious) details.push(item.delicious);
+                if(item.packaging) details.push(item.packaging);
+                let detailsText = details.join(' | ');
+
+                return `
+                <div style="padding:10px 0; border-bottom:1px solid #45423E;">
+                    <div style="display:flex; justify-content:space-between; font-size:13px;">
+                        <div style="font-weight:600;">${item.name}</div>
+                        <div>${item.quantity} x ${item.price}฿</div>
+                    </div>
+                    <div style="font-size:11px; color:#726E68; margin-top:4px;">${detailsText}</div>
+                </div>`;
+            }).join('');
 
             return `
             <div style="background:#2A2826; border-radius:12px; padding:16px; margin-bottom:16px;">
-                <div style="font-size:11px; color:#726E68; margin-bottom:10px;">${d.toLocaleDateString('th-TH')} ${d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}</div>
-                <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700; color:#B7B4AE; padding-bottom:8px; border-bottom:1px solid #45423E;">
-                    <span style="flex:2;">รายการ</span>
-                    <span style="flex:1; text-align:center;">จำนวน</span>
-                    <span style="flex:1; text-align:right;">รวม(฿)</span>
+                <div style="font-size:11px; color:#B7B4AE; margin-bottom:10px; border-bottom:1px dashed #45423E; padding-bottom:5px;">
+                    ${d.toLocaleDateString('th-TH')} ${d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}
                 </div>
                 ${tableRows}
             </div>`;
@@ -879,7 +885,6 @@
         list.innerHTML = '<div style="text-align:center; color:#ff4d4d; padding: 20px;">ไม่สามารถโหลดประวัติได้</div>'; 
     }
 }
-
 
   </script>
 </body>
