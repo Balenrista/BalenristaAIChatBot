@@ -260,22 +260,36 @@
     .history-btn:hover { color: var(--col-accent); border-color: var(--col-accent); }
     .history-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; justify-content: center; align-items: center; }
     .history-content { background: var(--bg-card); width: 85%; max-width: 400px; max-height: 75vh; border-radius: 20px; padding: 24px; color: var(--col-accent); overflow-y: auto; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-        /* 🌟 สไตล์สำหรับปุ่มที่มีแทรกรูปภาพ (คงรูปแบบ 2 คอลัมน์) */
+            /* 🌟 สไตล์สำหรับปุ่มที่มีแทรกรูปภาพ (เอฟเฟกต์รูปทะลุขอบ Pop-out 3D) */
     .opt-btn.with-img {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 8px; /* ระยะห่างระหว่างรูปกับข้อความ */
-      padding: 14px 8px; /* เพิ่มพื้นที่บนล่างให้ปุ่มไม่ดูอึดอัด */
+      justify-content: flex-end;
+      padding: 10px 8px; 
+      padding-top: 35px; /* ดันพื้นที่ด้านบนในปุ่มให้ว่าง เพื่อให้รูปมาวางทับพอดี */
+      margin-top: 35px; /* เพิ่มระยะห่างด้านบนของปุ่ม เพื่อไม่ให้รูปทะลุไปทับปุ่มแถวบน */
+      overflow: visible; /* หัวใจสำคัญ: ยอมให้รูปภาพล้นออกนอกขอบปุ่ม */
     }
     
     .opt-btn.with-img img {
-      width: 50px; /* ปรับขนาดความใหญ่ของรูปภาพได้ตรงนี้ */
-      height: 50px;
+      position: absolute;
+      top: -30px; /* ดึงรูปขึ้นไปด้านบนให้ทะลุขอบ (ปรับตัวเลขมากน้อยได้ตามความชอบ) */
+      left: 50%;
+      transform: translateX(-50%); /* จัดให้อยู่กึ่งกลางพอดี */
+      width: 70px; /* ปรับให้รูปใหญ่ขึ้นนิดนึงจะได้ดูเด้งๆ */
+      height: 70px;
       object-fit: contain;
-      margin-bottom: 4px;
+      filter: drop-shadow(0px 8px 10px rgba(0,0,0,0.3)); /* เพิ่มเงาดำบางๆ ให้รูปลอยแบบ 3D */
     }
+    
+    .opt-btn.with-img span {
+      position: relative;
+      z-index: 2;
+      line-height: 1.2;
+    }
+
 
   </style>
 </head>
