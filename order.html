@@ -260,6 +260,22 @@
     .history-btn:hover { color: var(--col-accent); border-color: var(--col-accent); }
     .history-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; justify-content: center; align-items: center; }
     .history-content { background: var(--bg-card); width: 85%; max-width: 400px; max-height: 75vh; border-radius: 20px; padding: 24px; color: var(--col-accent); overflow-y: auto; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        /* 🌟 สไตล์สำหรับปุ่มที่มีแทรกรูปภาพ (คงรูปแบบ 2 คอลัมน์) */
+    .opt-btn.with-img {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px; /* ระยะห่างระหว่างรูปกับข้อความ */
+      padding: 14px 8px; /* เพิ่มพื้นที่บนล่างให้ปุ่มไม่ดูอึดอัด */
+    }
+    
+    .opt-btn.with-img img {
+      width: 50px; /* ปรับขนาดความใหญ่ของรูปภาพได้ตรงนี้ */
+      height: 50px;
+      object-fit: contain;
+      margin-bottom: 4px;
+    }
 
   </style>
 </head>
@@ -318,16 +334,40 @@
         </div>
       </div>
 
-      <div id="deliciousSection" style="display: none;">
+            <div id="deliciousSection" style="display: none;">
         <div class="option-group-title">เพิ่มความอร่อย <span style="color:var(--text-muted); font-weight:400;">(เลือกได้ 1 อย่าง)</span></div>
+        
+        <!-- ใช้ option-selector-grid (2 คอลัมน์) เหมือนเดิมเป๊ะ -->
         <div class="option-selector-grid" id="deliciousGrid">
-          <button class="opt-btn" onclick="selectOption('delicious', this, 'Chocolate', 10)">Chocolate (+10฿)</button>
-          <button class="opt-btn" onclick="selectOption('delicious', this, 'Cocoflower (น้ำช่อดอกมะพร้าว)', 10)">น้ำช่อดอกมะพร้าว (+10฿)</button>
-          <button class="opt-btn" onclick="selectOption('delicious', this, 'Orange', 10)">Orange (+10฿)</button>
-          <button class="opt-btn" onclick="selectOption('delicious', this, 'Milk', 10)">Milk (+10฿)</button>
-          <button class="opt-btn" onclick="selectOption('delicious', this, 'Coffee', 10)">Coffee (+10฿)</button>
+          
+          <button class="opt-btn with-img" onclick="selectOption('delicious', this, 'Chocolate', 10)">
+            <img src="./chocolate.png" alt="Chocolate">
+            <span>Chocolate (+10฿)</span>
+          </button>
+
+          <button class="opt-btn with-img" onclick="selectOption('delicious', this, 'Cocoflower (น้ำช่อดอกมะพร้าว)', 10)">
+            <img src="./cocoflower.png" alt="Coconutflower">
+            <span>น้ำช่อดอกมะพร้าว (+10฿)</span>
+          </button>
+
+          <button class="opt-btn with-img" onclick="selectOption('delicious', this, 'Orange', 10)">
+            <img src="./orange.png" alt="Orange">
+            <span>Orange (+10฿)</span>
+          </button>
+
+          <button class="opt-btn with-img" onclick="selectOption('delicious', this, 'Milk', 10)">
+            <img src="./milk.png" alt="Milk">
+            <span>Milk (+10฿)</span>
+          </button>
+
+          <button class="opt-btn with-img" onclick="selectOption('delicious', this, 'Coffee', 10)">
+            <img src="./coffee.png" alt="Coffee">
+            <span>Coffee (+10฿)</span>
+          </button>
+
         </div>
       </div>
+
 
       <div id="icePackSection" style="display: none;">
         <div class="option-group-title">การบรรจุน้ำแข็ง</div>
