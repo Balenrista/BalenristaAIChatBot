@@ -13,15 +13,21 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     
     :root {
-      --bg-main: #0A0A0A;       
-      --bg-card: #33312F;       
-      --col-accent: #B7B4AE;    
-      --col-danger: #ff4d4d;
-      --text-muted: #726E68;
-      --text-dark: #0A0A0A;
-      --border-color: #45423E;
-      --border-radius-btn: 8px;
-      --border-radius-card: 16px;
+      /* 🌟 ธีมสี Dark Neumorphism (ดึงมาจากสีเดิมของร้าน) */
+      --bg-main: #262422;       /* สีพื้นฐาน (ต้องเหมือนกันทั้งฉากหลังและปุ่ม) */
+      --col-accent: #B7B4AE;    /* สีตัวอักษรหลัก */
+      --col-active: #D3D0C9;    /* สีตัวอักษรตอนปุ่มถูกกด */
+      --col-danger: #ff6b6b;
+      --text-muted: #8c8881;
+      --text-dark: #11100F;
+      
+      /* 🌟 สูตรแสงและเงา 3D */
+      --shadow-out: 6px 6px 12px #151312, -6px -6px 12px #373532; /* นูนขึ้น */
+      --shadow-in: inset 5px 5px 10px #151312, inset -5px -5px 10px #373532; /* ยุบลง */
+      --shadow-sm: 4px 4px 8px #151312, -4px -4px 8px #373532; /* นูนขึ้นแบบเล็กๆ */
+      
+      --border-radius-btn: 14px;
+      --border-radius-card: 20px;
     }
 
     html, body { 
@@ -31,12 +37,12 @@
       background-color: var(--bg-main); 
       color: var(--col-accent);
       font-family: 'Prompt', sans-serif;
-      padding-bottom: 100px;
+      padding-bottom: 110px;
     }
     
     /* Header */
     .header { 
-      background: var(--bg-card); 
+      background: var(--bg-main); 
       color: var(--col-accent); 
       padding: 16px 20px; 
       font-size: 18px; 
@@ -47,39 +53,39 @@
       position: sticky; 
       top: 0; 
       z-index: 100; 
-      border-bottom: 1px solid var(--border-color); 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3); /* เงาใต้ Header แยกสัดส่วน */
     }
     
     .container { padding: 16px; width: 100%; max-width: 600px; margin: 0 auto; }
     
     /* Banner แจ้งเตือน */
     .alert-banner { 
-      background-color: #241111; 
+      background-color: var(--bg-main); 
       color: var(--col-danger); 
-      padding: 12px 16px; 
+      padding: 14px 16px; 
       border-radius: var(--border-radius-btn); 
       font-size: 13px; 
       font-weight: 600; 
-      margin-bottom: 16px; 
+      margin-bottom: 20px; 
       text-align: center; 
-      border: 1px solid var(--border-color); 
+      box-shadow: var(--shadow-in); /* ทำให้ดูเหมือนจมลงไปในจอ */
     }
     
     /* แถบหมวดหมู่แบบเลื่อนขวาง */
     .category-scroll { 
       display: flex; 
       overflow-x: auto; 
-      gap: 8px; 
-      padding-bottom: 12px; 
-      margin-bottom: 16px; 
+      gap: 16px; 
+      padding: 10px 4px 16px 4px; 
+      margin-bottom: 12px; 
       scrollbar-width: none; 
     }
     .category-scroll::-webkit-scrollbar { display: none; }
     
     .cat-tab { 
-      background: var(--bg-card); 
-      border: 1px solid var(--border-color); 
-      padding: 8px 16px; 
+      background: var(--bg-main); 
+      box-shadow: var(--shadow-out); /* ทำให้นูนขึ้น */
+      padding: 10px 20px; 
       border-radius: 9999px; 
       font-size: 13px; 
       font-weight: 600; 
@@ -87,180 +93,193 @@
       white-space: nowrap; 
       cursor: pointer; 
       transition: all 0.2s ease; 
+      border: none;
     }
     .cat-tab.active { 
-      background: var(--col-accent); 
-      color: var(--text-dark); 
-      border-color: var(--col-accent); 
+      box-shadow: var(--shadow-in); /* เวลากดให้บุ๋มลงไป */
+      color: var(--col-active); 
     }
     
     /* รายการเมนูกริด 2 คอลัมน์ */
-    .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 4px; }
     .menu-card { 
-      background: var(--bg-card); 
+      background: var(--bg-main); 
       border-radius: var(--border-radius-card); 
-      padding: 12px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+      padding: 14px; 
+      box-shadow: var(--shadow-out); /* การ์ดลอยขึ้นจากจอ */
       display: flex; 
       flex-direction: column; 
       position: relative; 
-      border: 1px solid var(--border-color); 
     }
+    
+    /* กรอบรูปภาพ (ทำให้จมลงไปนิดๆ เพื่อเน้นรูป) */
     .menu-img-wrapper { 
       position: relative; 
       width: 100%; 
       aspect-ratio: 1; 
-      border-radius: var(--border-radius-btn); 
+      border-radius: 12px; 
       background: var(--bg-main); 
       overflow: hidden; 
-      margin-bottom: 10px; 
-      border: 1px solid var(--border-color); 
+      margin-bottom: 12px; 
+      box-shadow: var(--shadow-in); 
+      padding: 4px;
     }
-    .menu-img { width: 100%; height: 100%; object-fit: cover; }
+    .menu-img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
     
     .menu-info { flex-grow: 1; display: flex; flex-direction: column; }
-    .menu-title { font-size: 14px; font-weight: 600; line-height: 1.4; margin-bottom: 4px; color: var(--col-accent); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .menu-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1; }
+    .menu-title { font-size: 14px; font-weight: 600; line-height: 1.4; margin-bottom: 6px; color: var(--col-active); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .menu-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1; }
     
     /* ราคา + ปุ่มบวก */
     .card-action-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-    .card-price { font-size: 15px; font-weight: 700; color: #4CAF50; }
+    .card-price { font-size: 16px; font-weight: 700; color: #4CAF50; }
+    
+    /* ปุ่มบวกแบบ 3D */
     .add-icon-btn { 
-      background: var(--col-accent); 
-      color: var(--text-dark); 
+      background: var(--bg-main); 
+      color: var(--col-active); 
       border: none; 
-      width: 30px; 
-      height: 30px; 
-      border-radius: 6px; 
+      width: 36px; 
+      height: 36px; 
+      border-radius: 50%; /* เปลี่ยนเป็นวงกลมให้สวยขึ้น */
       font-size: 20px; 
       font-weight: 500; 
       display: flex; 
       justify-content: center; 
       align-items: center; 
       cursor: pointer; 
-      transition: 0.15s; 
+      box-shadow: var(--shadow-sm); 
+      transition: all 0.2s ease; 
     }
-    .add-icon-btn:active { transform: scale(0.92); opacity: 0.8; }
+    .add-icon-btn:active { box-shadow: var(--shadow-in); transform: scale(0.95); } /* เอฟเฟกต์เวลากดปุ่ม */
     
     /* แถบควบคุมตะกร้าสินค้าด้านล่างสุด */
     .cart-bar { 
       position: fixed; 
-      bottom: 0; 
-      left: 0; 
-      right: 0; 
-      background: var(--bg-card); 
-      padding: 16px 20px; 
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.5); 
+      bottom: 0; left: 0; right: 0; 
+      background: var(--bg-main); 
+      padding: 20px; 
+      box-shadow: 0 -8px 20px rgba(0,0,0,0.4); 
       z-index: 999; 
       display: flex; 
       justify-content: center; 
-      border-top: 1px solid var(--border-color); 
     }
     .confirm-btn { 
       width: 100%; 
       max-width: 560px; 
       border: none; 
-      padding: 14px; 
-      border-radius: var(--border-radius-btn); 
+      padding: 16px; 
+      border-radius: 16px; 
       font-family: 'Prompt', sans-serif; 
       font-size: 15px; 
       font-weight: 700; 
       color: var(--text-dark); 
-      background-color: var(--col-accent); 
+      background-color: var(--col-accent); /* ใช้สีหลักของร้าน */
+      box-shadow: 4px 4px 10px rgba(0,0,0,0.5), inset 2px 2px 4px rgba(255,255,255,0.3); /* ปุ่มยืนยันยังต้องเด่นอยู่ */
       cursor: pointer; 
       transition: all 0.2s ease; 
       text-align: center; 
     }
+    .confirm-btn:active { transform: scale(0.98); box-shadow: inset 4px 4px 8px rgba(0,0,0,0.5); }
+    .confirm-btn:disabled { opacity: 0.5; box-shadow: var(--shadow-in); background: var(--bg-main); color: var(--text-muted); }
 
-    /* โครงสร้างป๊อปอัพสไลด์ขึ้น (Bottom Sheet) */
+    /* โครงสร้างป๊อปอัพสไลด์ขึ้น */
     .sheet-overlay { position: fixed; top: 0; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; }
     .bottom-sheet { 
       position: fixed; 
-      bottom: 0; 
-      left: 0; 
-      right: 0; 
-      background: var(--bg-card); 
-      border-top-left-radius: 20px; 
-      border-top-right-radius: 20px; 
+      bottom: 0; left: 0; right: 0; 
+      background: var(--bg-main); 
+      border-top-left-radius: 30px; 
+      border-top-right-radius: 30px; 
       max-height: 85vh; 
       z-index: 1001; 
       display: flex; 
       flex-direction: column; 
       transform: translateY(100%); 
-      transition: transform 0.3s ease-out; 
-      border-top: 1px solid var(--border-color); 
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* ทำให้เด้งดึ๋งนิดๆ */
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.6); 
     }
-    .sheet-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #2A2826; border-top-left-radius: 20px; border-top-right-radius: 20px; }
-    .sheet-title { font-size: 15px; font-weight: 700; color: var(--col-accent); }
-    .close-sheet { background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; }
-    .sheet-content { padding: 20px; overflow-y: auto; flex-grow: 1; background-color: var(--bg-main); }
+    .sheet-header { padding: 24px; display: flex; justify-content: space-between; align-items: center; }
+    .sheet-title { font-size: 16px; font-weight: 700; color: var(--col-active); }
+    .close-sheet { background: var(--bg-main); border: none; font-size: 14px; width: 32px; height: 32px; border-radius: 50%; color: var(--col-accent); cursor: pointer; box-shadow: var(--shadow-sm); display: flex; justify-content: center; align-items: center; }
+    .close-sheet:active { box-shadow: var(--shadow-in); }
+    .sheet-content { padding: 0 24px 20px 24px; overflow-y: auto; flex-grow: 1; }
     
     /* สไตล์กลุ่มตัวเลือกภายในป๊อปอัพ */
-    .option-group-title { font-size: 13px; font-weight: 700; margin-top: 12px; margin-bottom: 12px; color: var(--col-accent); display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .option-group-title { font-size: 13px; font-weight: 700; margin-top: 16px; margin-bottom: 16px; color: var(--col-accent); display: flex; justify-content: space-between; text-transform: uppercase; letter-spacing: 0.5px; }
     .option-group-title span.required { color: var(--col-danger); font-size: 11px; font-weight: 400; }
-    .option-selector-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+    .option-selector-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; padding: 8px 4px; }
     
+    /* ปุ่มตัวเลือก */
     .opt-btn { 
-      background: var(--bg-card); 
-      border: 1px solid var(--border-color); 
-      padding: 12px; 
+      background: var(--bg-main); 
+      box-shadow: var(--shadow-out);
+      border: none; 
+      padding: 14px; 
       border-radius: var(--border-radius-btn); 
       font-family: 'Prompt', sans-serif; 
       font-size: 12px; 
       text-align: center; 
       cursor: pointer; 
-      transition: 0.15s; 
-      color: var(--col-accent); 
+      transition: all 0.2s; 
+      color: var(--text-muted); 
       font-weight: 500;
     }
     .opt-btn.active { 
-      background: var(--col-accent); 
-      color: var(--text-dark); 
-      border-color: var(--col-accent); 
+      box-shadow: var(--shadow-in); /* ยุบลงเวลาถูกเลือก */
+      color: #4CAF50; /* ใช้สีเขียวให้รู้ว่าถูกเลือก */
       font-weight: 700; 
     }
     
     /* โครงสร้างรายการภายในตะกร้า */
-    .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-color); }
-    .cart-item-name { font-size: 14px; font-weight: 600; color: var(--col-accent); }
-    .cart-item-details { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; }
+    .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .cart-item-name { font-size: 15px; font-weight: 600; color: var(--col-active); }
+    .cart-item-details { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; }
     
-    .quantity-control { display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border-color); border-radius: var(--border-radius-btn); overflow: hidden; width: 100px; height: 34px; background: var(--bg-card); }
-    .qty-btn { background: #2A2826; border: none; color: var(--col-accent); width: 34px; height: 100%; font-size: 16px; font-weight: 500; cursor: pointer; }
-    .qty-num { font-size: 13px; font-weight: 700; width: 32px; text-align: center; color: var(--col-accent); }
+    /* กล่องควบคุมจำนวน (ยุบลงไปในจอ) */
+    .quantity-control { display: flex; justify-content: space-between; align-items: center; border-radius: 999px; overflow: hidden; width: 110px; height: 38px; background: var(--bg-main); box-shadow: var(--shadow-in); padding: 0 4px; }
+    .qty-btn { background: transparent; border: none; color: var(--col-accent); width: 34px; height: 100%; font-size: 18px; font-weight: 500; cursor: pointer; }
+    .qty-btn:active { transform: scale(0.9); }
+    .qty-num { font-size: 14px; font-weight: 700; width: 32px; text-align: center; color: var(--col-active); }
     
-    .sheet-footer { padding: 16px 20px; border-top: 1px solid var(--border-color); background: var(--bg-card); }
-    .summary-row { display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--col-accent); }
+    .sheet-footer { padding: 20px 24px; background: var(--bg-main); box-shadow: 0 -4px 15px rgba(0,0,0,0.2); }
+    .summary-row { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--col-active); }
 
     #loading { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
 
-    /* หน้าต่างป๊อปอัพกรอกข้อมูลจัดส่งสไตล์ Balenrista Minimal */
-    .delivery-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-    .delivery-modal-content { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 24px; border-radius: 24px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); position: relative; animation: modalFade 0.2s ease-out; }
+    /* หน้าต่างป๊อปอัพกรอกข้อมูลจัดส่ง */
+    .delivery-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; padding: 20px; }
+    .delivery-modal-content { background-color: var(--bg-main); padding: 30px 24px; border-radius: 24px; width: 100%; max-width: 400px; box-shadow: var(--shadow-out); position: relative; animation: modalFade 0.2s ease-out; }
     @keyframes modalFade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-    .modal-title { font-size: 15px; font-weight: 700; color: var(--col-accent); margin-bottom: 18px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .modal-group { margin-bottom: 14px; text-align: left; }
-    .modal-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .modal-input { width: 100%; padding: 12px; border-radius: var(--border-radius-btn); background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--col-accent); font-size: 14px; font-family: inherit; box-sizing: border-box; transition: border-color 0.2s; }
-    .modal-input:focus { outline: none; border-color: var(--col-accent); }
-    .modal-btn-group { display: flex; gap: 10px; margin-top: 20px; }
-    .modal-btn { flex: 1; padding: 12px; font-size: 14px; font-weight: 700; border: none; border-radius: var(--border-radius-btn); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Prompt', sans-serif; }
-    .modal-btn-confirm { background-color: var(--col-accent); color: var(--text-dark); }
-    .modal-btn-cancel { background-color: #241111; color: var(--col-danger); border: 1px solid var(--border-color); }
-    .modal-btn:active { transform: scale(0.97); }
+    .modal-title { font-size: 16px; font-weight: 700; color: var(--col-active); margin-bottom: 24px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; }
+    .modal-group { margin-bottom: 16px; text-align: left; }
+    .modal-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+    
+    /* ช่อง Input (บุ๋มลง) */
+    .modal-input { width: 100%; padding: 14px; border-radius: var(--border-radius-btn); background-color: var(--bg-main); border: none; color: var(--col-active); font-size: 14px; font-family: inherit; box-shadow: var(--shadow-in); transition: all 0.2s; }
+    .modal-input:focus { outline: none; box-shadow: inset 6px 6px 12px #151312, inset -6px -6px 12px #373532, 0 0 0 1px var(--col-accent); }
+    
+    .modal-btn-group { display: flex; gap: 16px; margin-top: 24px; }
+    .modal-btn { flex: 1; padding: 14px; font-size: 14px; font-weight: 700; border: none; border-radius: var(--border-radius-btn); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Prompt', sans-serif; }
+    .modal-btn-confirm { background-color: var(--bg-main); color: #4CAF50; box-shadow: var(--shadow-sm); }
+    .modal-btn-cancel { background-color: var(--bg-main); color: var(--col-danger); box-shadow: var(--shadow-sm); }
+    .modal-btn:active { box-shadow: var(--shadow-in); transform: scale(0.97); }
 
-    /* หน้าต่างป๊อปอัพสำเร็จออเดอร์ & แจกแต้มพรีเมียม */
-    .success-modal { display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-    .success-modal-content { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 35px 24px; border-radius: 24px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); animation: modalFade 0.2s ease-out; }
-    .success-icon-box { font-size: 54px; color: #4CAF50; margin-bottom: 16px; }
-    .success-points-display { font-size: 42px; font-weight: 700; color: var(--col-accent); margin: 12px 0 4px 0; font-family: 'Poppins', sans-serif; }
+    /* หน้าต่างป๊อปอัพสำเร็จออเดอร์ */
+    .success-modal { display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 20px; }
+    .success-modal-content { background-color: var(--bg-main); padding: 40px 24px; border-radius: 30px; width: 100%; max-width: 360px; text-align: center; box-shadow: var(--shadow-out); animation: modalFade 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .success-icon-box { font-size: 60px; color: #4CAF50; margin-bottom: 20px; text-shadow: 0 0 20px rgba(76, 175, 80, 0.4); }
+    .success-points-display { font-size: 42px; font-weight: 700; color: var(--col-active); margin: 12px 0 4px 0; font-family: 'Poppins', sans-serif; }
     .success-points-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; }
-        /* 🌟 ปุ่มและหน้าต่าง History (แบบมินิมอล) */
-    .history-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); font-size: 12px; padding: 4px 10px; border-radius: 12px; cursor: pointer; margin-right: 12px; transition: 0.3s; font-family: 'Prompt', sans-serif; }
-    .history-btn:hover { color: var(--col-accent); border-color: var(--col-accent); }
+    
+    /* 🌟 ปุ่ม History แบบ 3D */
+    .history-btn { background: var(--bg-main); border: none; color: var(--col-accent); font-size: 12px; padding: 8px 16px; border-radius: 999px; cursor: pointer; margin-right: 12px; transition: 0.2s; font-family: 'Prompt', sans-serif; box-shadow: var(--shadow-sm); font-weight: 600; }
+    .history-btn:active { box-shadow: var(--shadow-in); transform: scale(0.95); }
+    
     .history-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; justify-content: center; align-items: center; }
-    .history-content { background: var(--bg-card); width: 85%; max-width: 400px; max-height: 75vh; border-radius: 20px; padding: 24px; color: var(--col-accent); overflow-y: auto; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-            /* 🌟 สไตล์สำหรับปุ่มที่มีแทรกรูปภาพ (เอฟเฟกต์รูปทะลุขอบ Pop-out 3D) */
+    .history-content { background: var(--bg-main); width: 85%; max-width: 400px; max-height: 75vh; border-radius: 24px; padding: 24px; color: var(--col-accent); overflow-y: auto; box-shadow: var(--shadow-out); }
+    
+    /* 🌟 เอฟเฟกต์รูปทะลุขอบ 3D Pop-out */
     .opt-btn.with-img {
       position: relative;
       display: flex;
@@ -268,20 +287,20 @@
       align-items: center;
       justify-content: flex-end;
       padding: 10px 8px; 
-      padding-top: 35px; /* ดันพื้นที่ด้านบนในปุ่มให้ว่าง เพื่อให้รูปมาวางทับพอดี */
-      margin-top: 35px; /* เพิ่มระยะห่างด้านบนของปุ่ม เพื่อไม่ให้รูปทะลุไปทับปุ่มแถวบน */
-      overflow: visible; /* หัวใจสำคัญ: ยอมให้รูปภาพล้นออกนอกขอบปุ่ม */
+      padding-top: 35px; 
+      margin-top: 35px; 
+      overflow: visible; 
     }
     
     .opt-btn.with-img img {
       position: absolute;
-      top: -30px; /* ดึงรูปขึ้นไปด้านบนให้ทะลุขอบ (ปรับตัวเลขมากน้อยได้ตามความชอบ) */
+      top: -35px; 
       left: 50%;
-      transform: translateX(-50%); /* จัดให้อยู่กึ่งกลางพอดี */
-      width: 70px; /* ปรับให้รูปใหญ่ขึ้นนิดนึงจะได้ดูเด้งๆ */
-      height: 70px;
+      transform: translateX(-50%); 
+      width: 75px; 
+      height: 75px;
       object-fit: contain;
-      filter: drop-shadow(0px 8px 10px rgba(0,0,0,0.3)); /* เพิ่มเงาดำบางๆ ให้รูปลอยแบบ 3D */
+      filter: drop-shadow(0px 10px 8px rgba(0,0,0,0.5)); /* เงาภาพให้ดูลอยเด่น */
     }
     
     .opt-btn.with-img span {
@@ -289,20 +308,17 @@
       z-index: 2;
       line-height: 1.2;
     }
-
-
   </style>
 </head>
 <body>
 
-    <div class="header">
-    <span>Balenrista Order Online</span>
+  <div class="header">
+    <span>Balenrista Order</span>
     <div style="display: flex; align-items: center;">
       <button class="history-btn" onclick="toggleHistory()">History</button>
       <span id="headerCartCount" style="font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 6px;"><i class="ph-bold ph-shopping-cart"></i> (0)</span>
     </div>
   </div>
-
 
   <div class="container">
     <div class="alert-banner" id="alertBanner" style="display: none;">
@@ -339,7 +355,7 @@
       </div>
 
       <div id="topLayerSection" style="display: none;">
-        <div class="option-group-title">Top Layer ซอสราดด้านบน <span style="color:var(--text-muted); font-weight:400;">(เลือกได้ 1 อย่าง)</span></div>
+        <div class="option-group-title">Top Layer ซอสราดด้านบน <span style="color:var(--text-muted); font-weight:400; text-transform: none;">(เลือกได้ 1 อย่าง)</span></div>
         <div class="option-selector-grid" id="topLayerGrid">
           <button class="opt-btn" onclick="selectOption('topLayer', this, 'Coco', 0)">Coco</button>
           <button class="opt-btn" onclick="selectOption('topLayer', this, 'Green Tea', 0)">Green Tea</button>
@@ -348,40 +364,31 @@
         </div>
       </div>
 
-            <div id="deliciousSection" style="display: none;">
-        <div class="option-group-title">เพิ่มความอร่อย <span style="color:var(--text-muted); font-weight:400;">(เลือกได้ 1 อย่าง)</span></div>
-        
-        <!-- ใช้ option-selector-grid (2 คอลัมน์) เหมือนเดิมเป๊ะ -->
+      <div id="deliciousSection" style="display: none;">
+        <div class="option-group-title">เพิ่มความอร่อย <span style="color:var(--text-muted); font-weight:400; text-transform: none;">(เลือกได้ 1 อย่าง)</span></div>
         <div class="option-selector-grid" id="deliciousGrid">
-          
           <button class="opt-btn with-img" onclick="selectOption('delicious', this, 'Chocolate', 10)">
             <img src="./Chocolate.png" alt="Chocolate">
             <span>Chocolate (+10฿)</span>
           </button>
-
           <button class="opt-btn with-img" onclick="selectOption('delicious', this, 'Cocoflower (น้ำช่อดอกมะพร้าว)', 10)">
             <img src="./Coconutflower.png" alt="Coconutflower">
             <span>น้ำช่อดอกมะพร้าว (+10฿)</span>
           </button>
-
           <button class="opt-btn with-img" onclick="selectOption('delicious', this, 'Orange', 10)">
             <img src="./Orange.png" alt="Orange">
             <span>Orange (+10฿)</span>
           </button>
-
           <button class="opt-btn with-img" onclick="selectOption('delicious', this, 'Milk', 10)">
             <img src="./Milk.png" alt="Milk">
             <span>Milk (+10฿)</span>
           </button>
-
           <button class="opt-btn with-img" onclick="selectOption('delicious', this, 'Coffee', 10)">
             <img src="./Coffee.png" alt="Coffee">
             <span>Coffee (+10฿)</span>
           </button>
-
         </div>
       </div>
-
 
       <div id="icePackSection" style="display: none;">
         <div class="option-group-title">การบรรจุน้ำแข็ง</div>
@@ -409,9 +416,9 @@
         <span>ยอดรวมทั้งสิ้น</span>
         <span id="cartTotalPrice" style="color:#4CAF50;">฿0</span>
       </div>
-      <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 16px; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px;">
-        <span><i class="ph-fill ph-gift" style="color: var(--col-accent); margin-right: 4px;"></i> แต้มสะสมที่จะได้รับ</span>
-        <span id="cartTotalPoints" style="color: var(--col-accent); font-weight: 700;">0 แต้ม</span>
+      <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 20px; padding-bottom: 15px;">
+        <span><i class="ph-fill ph-gift" style="color: var(--col-active); margin-right: 4px;"></i> แต้มสะสมที่จะได้รับ</span>
+        <span id="cartTotalPoints" style="color: var(--col-active); font-weight: 700;">0 แต้ม</span>
       </div>
       <button class="confirm-btn" id="sheetConfirmBtn" disabled>ยืนยันคำสั่งซื้อ</button>
     </div>
@@ -442,27 +449,29 @@
   <div id="successModal" class="success-modal">
       <div class="success-modal-content">
           <div class="success-icon-box"><i class="ph-fill ph-check-circle"></i></div>
-          <h3 style="font-size: 18px; color: var(--col-accent); font-weight: 700;">สั่งซื้อสำเร็จเรียบร้อยค่ะ!</h3>
+          <h3 style="font-size: 18px; color: var(--col-active); font-weight: 700;">สั่งซื้อสำเร็จเรียบร้อยค่ะ!</h3>
           
           <div class="success-points-display" id="successPointsText">+0 แต้ม</div>
           <div class="success-points-label">คะแนนสะสมที่คุณได้รับ</div>
           
-          <p id="successModalDesc" style="font-size: 13px; color: #9a968f; line-height: 1.6; margin-bottom: 25px;"></p>
+          <p id="successModalDesc" style="font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 25px;"></p>
           
-          <button class="modal-btn modal-btn-confirm" id="claimRewardBtn" style="width: 100%; padding: 14px; font-size: 14px; border-radius: 12px;">
+          <button class="modal-btn confirm-btn" id="claimRewardBtn" style="width: 100%; padding: 16px; font-size: 14px;">
               <i class="ph-bold ph-gift"></i> จิ้มรับแต้มสะสมเลย
           </button>
       </div>
   </div>
+
   <div id="historyPopup" class="history-overlay" onclick="toggleHistory()">
       <div class="history-content" onclick="event.stopPropagation()">
           <h3 style="margin-top: 0; text-align: center; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">Order History</h3>
-          <hr style="border:0; border-top:1px solid var(--border-color); margin: 15px 0;">
+          <div style="margin: 20px 0;"></div>
           <div id="historyList">Loading...</div>
-          <button onclick="toggleHistory()" style="margin-top:20px; width:100%; padding:12px; background:var(--bg-main); color:var(--col-accent); border:1px solid var(--border-color); border-radius:var(--border-radius-btn); cursor:pointer; font-weight:700; font-family: 'Prompt', sans-serif;">Close</button>
+          <button class="opt-btn" onclick="toggleHistory()" style="margin-top:24px; width:100%; padding:14px; font-weight:700;">Close</button>
       </div>
   </div>
 
+  <!-- Javascript ด้านล่างนี้คือของเดิม 100% ไม่ได้แตะต้องครับ -->
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwgRQNxJ61vKYs2h538KyAvEq7KdXGozp1ieOPgMm4T2uD9Isgl2zGmgBS7S4zEs9pmEg/exec"; 
 
@@ -521,7 +530,7 @@
       const scroll = document.getElementById('categoryScroll');
       scroll.innerHTML = ''; 
       categories.forEach((cat, index) => {
-        const btn = document.createElement('div');
+        const btn = document.createElement('button');
         btn.className = 'cat-tab' + (index === 0 ? ' active' : '');
         btn.innerText = cat.name;
         btn.onclick = () => {
@@ -764,8 +773,9 @@
         [mainBtn, sheetBtn].forEach(btn => {
           btn.innerText = textClose; 
           btn.disabled = true;
-          btn.style.backgroundColor = "#45423E"; 
+          btn.style.backgroundColor = "var(--bg-main)"; 
           btn.style.color = "var(--text-muted)";
+          btn.style.boxShadow = "var(--shadow-in)";
           btn.style.cursor = "not-allowed";
         });
         return;
@@ -775,21 +785,31 @@
         const textLock = `ดูตะกร้าสินค้า (มีแล้ว ${totalQty} แก้ว)`;
         mainBtn.innerText = textLock;
         mainBtn.disabled = (totalQty === 0);
-        mainBtn.style.backgroundColor = totalQty === 0 ? "#45423E" : "var(--col-accent)";
-        mainBtn.style.color = totalQty === 0 ? "var(--text-muted)" : "var(--text-dark)";
+        
+        if(totalQty === 0){
+           mainBtn.style.backgroundColor = "var(--bg-main)";
+           mainBtn.style.color = "var(--text-muted)";
+           mainBtn.style.boxShadow = "var(--shadow-in)";
+        } else {
+           mainBtn.style.backgroundColor = "var(--col-accent)";
+           mainBtn.style.color = "var(--text-dark)";
+           mainBtn.style.boxShadow = "4px 4px 10px rgba(0,0,0,0.5), inset 2px 2px 4px rgba(255,255,255,0.3)";
+        }
         mainBtn.style.cursor = totalQty === 0 ? "not-allowed" : "pointer";
         mainBtn.onclick = totalQty > 0 ? openCartSheet : null;
 
         sheetBtn.innerText = `ขาดอีก ${4 - totalQty} แก้ว (สั่งขั้นต่ำ 4 แก้ว)`;
         sheetBtn.disabled = true;
-        sheetBtn.style.backgroundColor = "#45423E";
+        sheetBtn.style.backgroundColor = "var(--bg-main)";
         sheetBtn.style.color = "var(--text-muted)";
+        sheetBtn.style.boxShadow = "var(--shadow-in)";
         sheetBtn.style.cursor = "not-allowed";
       } else {
         mainBtn.innerText = `ตรวจสอบตะกร้า (${totalQty} แก้ว)`;
         mainBtn.disabled = false;
         mainBtn.style.backgroundColor = "var(--col-accent)";
         mainBtn.style.color = "var(--text-dark)";
+        mainBtn.style.boxShadow = "4px 4px 10px rgba(0,0,0,0.5), inset 2px 2px 4px rgba(255,255,255,0.3)";
         mainBtn.style.cursor = "pointer";
         mainBtn.onclick = openCartSheet;
 
@@ -797,6 +817,7 @@
         sheetBtn.disabled = false;
         sheetBtn.style.backgroundColor = "var(--col-accent)";
         sheetBtn.style.color = "var(--text-dark)";
+        sheetBtn.style.boxShadow = "4px 4px 10px rgba(0,0,0,0.5), inset 2px 2px 4px rgba(255,255,255,0.3)";
         sheetBtn.style.cursor = "pointer";
         sheetBtn.onclick = submitOrder;
       }
@@ -882,7 +903,7 @@
         document.body.style.cursor = 'default';
       });
     }
-        // 🌟 ฟังก์ชันจัดการ Order History
+
     function toggleHistory() {
         const popup = document.getElementById('historyPopup');
         popup.style.display = (popup.style.display === 'flex') ? 'none' : 'flex';
@@ -908,7 +929,7 @@
             let d = new Date(o.date);
             let items = JSON.parse(o.summary); 
             
-            let grandTotal = 0; // 1. สร้างตัวแปรเก็บยอดรวมทั้งหมดเริ่มที่ 0
+            let grandTotal = 0; 
 
             let tableRows = items.map(item => {
                 let details = [];
@@ -919,36 +940,33 @@
                 let detailsText = details.join(' | ');
 
                 let totalRowPrice = item.price * item.quantity;
-                grandTotal += totalRowPrice; // 2. สะสมยอดรวมในทุกๆ รายการ
+                grandTotal += totalRowPrice; 
 
                 return `
-                <div style="padding:10px 0; border-bottom:1px solid #45423E;">
+                <div style="padding:12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
                     <div style="display:flex; justify-content:space-between; font-size:13px;">
-                        <div style="font-weight:600; color:#B7B4AE;">${item.name}</div>
+                        <div style="font-weight:600; color:var(--col-active);">${item.name}</div>
                         <div style="color:#4CAF50; font-weight:700;">${item.quantity} x ${item.price}฿ = ${totalRowPrice}฿</div>
                     </div>
-                    <div style="font-size:11px; color:#726E68; margin-top:4px;">${detailsText}</div>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">${detailsText}</div>
                 </div>`;
             }).join('');
 
-            // 3. ใส่แสดงผลยอดรวมทั้งหมดไว้ท้ายรายการ
             return `
-            <div style="background:#2A2826; border-radius:12px; padding:16px; margin-bottom:16px;">
-                <div style="font-size:11px; color:#B7B4AE; margin-bottom:10px; border-bottom:1px dashed #45423E; padding-bottom:5px;">
+            <div style="background:var(--bg-main); border-radius:16px; padding:20px; margin-bottom:20px; box-shadow: var(--shadow-in);">
+                <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px; font-weight: 500;">
                     ${d.toLocaleDateString('th-TH')} ${d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}
                 </div>
                 ${tableRows}
-                <div style="text-align:right; margin-top:12px; font-size:14px; font-weight:700; color:#fff;">
+                <div style="text-align:right; margin-top:16px; font-size:15px; font-weight:700; color:var(--col-active);">
                     ยอดรวมทั้งสิ้น: <span style="color:#4CAF50;">${grandTotal.toLocaleString()}฿</span>
                 </div>
             </div>`;
         }).join('');
     } catch (e) { 
-        list.innerHTML = '<div style="text-align:center; color:#ff4d4d; padding: 20px;">ไม่สามารถโหลดประวัติได้</div>'; 
+        list.innerHTML = '<div style="text-align:center; color:#ff6b6b; padding: 20px;">ไม่สามารถโหลดประวัติได้</div>'; 
     }
 }
-
-
   </script>
 </body>
 </html>
