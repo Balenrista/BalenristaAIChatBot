@@ -308,6 +308,32 @@
       z-index: 2;
       line-height: 1.2;
     }
+        /* 🌟 สไตล์สำหรับป้ายวัตถุดิบ (แบบแคปซูลมินิมอล ไม่มีกรอบ) */
+    .ingredients-list {
+      display: flex;
+      flex-wrap: wrap; 
+      gap: 6px;
+      margin-top: 4px;
+      margin-bottom: 12px;
+    }
+    
+    .ingredient-tag {
+      background-color: #373532; 
+      color: var(--col-accent);
+      padding: 4px 10px;
+      border-radius: 12px; 
+      font-size: 10px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: none; 
+    }
+
+    .ingredient-tag i {
+      font-size: 12px; 
+      color: #D3D0C9; 
+    }
   </style>
 </head>
 <body>
@@ -473,7 +499,7 @@
 
   <!-- Javascript ด้านล่างนี้คือของเดิม 100% ไม่ได้แตะต้องครับ -->
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwgRQNxJ61vKYs2h538KyAvEq7KdXGozp1ieOPgMm4T2uD9Isgl2zGmgBS7S4zEs9pmEg/exec"; 
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwgRQNxJ61vKYs2h538KyAvEq7KdXGozp1ieOPgMm4T2uD9Isgl2zGmgBS7S4zEs9pmEg/exe"; 
 
     let allMenus = []; 
     let cart = []; 
@@ -548,7 +574,7 @@
       renderMenus(filtered);
     }
 
-    function renderMenus(menus) {
+        function renderMenus(menus) {
       const grid = document.getElementById('menuGrid');
       grid.innerHTML = ''; 
       if (menus.length === 0) {
@@ -563,12 +589,47 @@
           ? menu.image 
           : `./${encodeURIComponent(menu.loyverseName)}.png`;
 
+        // 🌟 ประมวลผลวัตถุดิบและดักจับไอคอน (อัปเดตเป็นเมล็ดกาแฟแล้ว)
+        let ingredientsHtml = '';
+        if (menu.ingredients && menu.ingredients.trim() !== '') {
+          const items = menu.ingredients.split(',').map(i => i.trim()).filter(i => i !== '');
+          if (items.length > 0) {
+            ingredientsHtml = `<div class="ingredients-list">`;
+            items.forEach(item => {
+              let lowerItem = item.toLowerCase();
+              let iconClass = "ph-circle"; 
+              
+              if (lowerItem.includes("tea") || lowerItem.includes("match") || lowerItem.includes("houjicha")) {
+                iconClass = "ph-leaf"; // 🍃 ชา / มัทฉะ
+              } else if (lowerItem.includes("coffee")) {
+                iconClass = "ph-bean"; // 🫘 เมล็ดกาแฟ
+              } else if (lowerItem.includes("milk") || lowerItem.includes("cream")) {
+                iconClass = "ph-drop"; // 🥛 นม / ครีม
+              } else if (lowerItem.includes("water")) {
+                iconClass = "ph-waves"; // 💧 น้ำเปล่า
+              } else if (lowerItem.includes("syrup") || lowerItem.includes("honey") || lowerItem.includes("sugar") || lowerItem.includes("caramel")) {
+                iconClass = "ph-drop-half-bottom"; // 🍯 ไซรัป / น้ำผึ้ง 
+              } else if (lowerItem.includes("orange") || lowerItem.includes("lemon") || lowerItem.includes("yuzu") || lowerItem.includes("mango") || lowerItem.includes("pineapple") || lowerItem.includes("strawberry") || lowerItem.includes("lychee")) {
+                iconClass = "ph-orange-slice"; // 🍊 ผลไม้ต่างๆ
+              } else if (lowerItem.includes("coconut") || lowerItem.includes("flower")) {
+                iconClass = "ph-flower-tulip"; // 🌸 ดอกมะพร้าว
+              } else if (lowerItem.includes("chocolate")) {
+                iconClass = "ph-circle"; // 🍫 ช็อกโกแลต 
+              }
+              
+              ingredientsHtml += `<div class="ingredient-tag"><i class="ph-fill ${iconClass}"></i><span>${item}</span></div>`;
+            });
+            ingredientsHtml += `</div>`;
+          }
+        }
+
         card.innerHTML = `
           <div class="menu-img-wrapper">
             <img src="${imgUrl}" class="menu-img" alt="${menu.loyverseName}">
           </div>
           <div class="menu-info">
             <div class="menu-title">${menu.loyverseName}</div>
+            ${ingredientsHtml} 
             <div class="menu-desc">${menu.description || ''}</div>
             <div class="card-action-row">
               <div class="card-price">฿${menu.price}</div>
@@ -579,6 +640,7 @@
         grid.appendChild(card);
       });
     }
+
 
     function updateModalPrice() {
       if (!selectedMenu) return;
