@@ -673,6 +673,9 @@
               if (lowerItem.includes("coffee") || lowerItem.includes("กาแฟ")) {
     svgIcon = customSVGs["Coffee"];
 } 
+else if (lowerItem.includes("earl grey") || lowerItem.includes("เอิร์ลเกรย์")) {
+    svgIcon = customSVGs["Earl Grey Tea"];
+} 
 else if (lowerItem.includes("thai tea") || lowerItem.includes("ชาไทย")) {
     svgIcon = customSVGs["Thai Tea"];
 } 
@@ -687,11 +690,6 @@ else if (lowerItem.includes("houjicha") || lowerItem.includes("โฮจิฉ�
 } 
 else if (lowerItem.includes("tea") || lowerItem.includes("ชา")) {
     svgIcon = customSVGs["Tea"] || customSVGs["Syrup"];
-  
-else if (lowerItem.includes("earl grey") || lowerItem.includes("เอิร์ลเกรย์")) {
-    svgIcon = customSVGs["Earl Grey Tea"];
-}
-
 } 
 else if (lowerItem.includes("condensed milk") || lowerItem.includes("นมข้น")) {
     svgIcon = customSVGs["Condensed Milk"];
@@ -750,6 +748,7 @@ else if (lowerItem.includes("water") || lowerItem.includes("น้ำเปล�
 else {
     svgIcon = "";
 }
+
 
               
               ingredientsHtml += `<div class="ingredient-tag">${svgIcon}<span>${item}</span></div>`;
