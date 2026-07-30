@@ -55,7 +55,29 @@
       z-index: 100; 
       box-shadow: 0 4px 10px rgba(0,0,0,0.3); /* เงาใต้ Header แยกสัดส่วน */
     }
+
+        .header-title {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
     
+    .brand-balenrista {
+      color: #ff4757;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    
+    .brand-order {
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
     .container { padding: 16px; width: 100%; max-width: 600px; margin: 0 auto; }
     
     /* Banner แจ้งเตือน */
@@ -345,13 +367,18 @@
 </head>
 <body>
 
-  <div class="header">
-    <span>Balenrista Order</span>
+        <div class="header">
+    <div class="header-title">
+      <span class="brand-balenrista">Balenrista</span>
+      <span class="brand-order">Order</span>
+    </div>
+    
     <div style="display: flex; align-items: center;">
       <button class="history-btn" onclick="toggleHistory()">History</button>
       <span id="headerCartCount" style="font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 6px;"><i class="ph-bold ph-shopping-cart"></i> (0)</span>
     </div>
   </div>
+
 
   <div class="container">
     <div class="alert-banner" id="alertBanner" style="display: none;">
