@@ -6,7 +6,7 @@
   <title>Balenrista - Order Online</title>
   
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Splash&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   
   <style>
@@ -56,26 +56,26 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.3); /* เงาใต้ Header แยกสัดส่วน */
     }
 
-        .header-title {
-      font-family: 'Poppins', sans-serif;
+            /* 🌟 ปรับให้ส่วนหัวใช้ฟอนต์ Splash ทั้งหมด */
+    .header-title {
+      font-family: 'Splash', cursive; /* 👈 ใส่ตรงนี้เพื่อให้ทั้ง Balenrista และ Order ใช้ฟอนต์ Splash ร่วมกัน */
       display: flex;
       align-items: baseline;
-      gap: 6px;
+      gap: 8px;
     }
     
     .brand-balenrista {
       color: #ff4757;
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
+      font-size: 32px;
+      font-weight: 400;
+      letter-spacing: 1px;
     }
     
     .brand-order {
       color: #ffffff;
-      font-size: 16px;
-      font-weight: 500;
+      font-size: 22px; /* ขนาดเล็กลงมาหน่อยเพื่อให้ชื่อร้าน Balenrista ดูเด่นกว่า */
+      font-weight: 400;
       letter-spacing: 1px;
-      text-transform: uppercase;
     }
 
     .container { padding: 16px; width: 100%; max-width: 600px; margin: 0 auto; }
