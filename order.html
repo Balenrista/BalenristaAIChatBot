@@ -362,10 +362,92 @@
       height: 14px !important; 
       display: block;
     }
+    /* 🌟 หน้าต่าง Gateway เลือกประเภทออเดอร์ */
+    .gateway-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: var(--bg-main);
+      z-index: 999999; /* ให้อยู่บนสุดตอนโหลดเว็บ */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      transition: opacity 0.3s ease;
+    }
+
+    .gateway-title {
+      font-family: 'Splash', cursive;
+      font-size: 42px;
+      color: #ff4757;
+      margin-bottom: 8px;
+    }
+
+    .gateway-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .gateway-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .gateway-btn {
+      background: var(--bg-main);
+      border: none;
+      padding: 24px 20px;
+      border-radius: var(--border-radius-card);
+      box-shadow: var(--shadow-out);
+      color: var(--col-active);
+      font-family: 'Prompt', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .gateway-btn i {
+      font-size: 28px;
+      color: #4CAF50;
+    }
+
+    .gateway-btn:active {
+      box-shadow: var(--shadow-in);
+      transform: scale(0.97);
+    }
 
   </style>
 </head>
 <body>
+  <!-- 🌟 หน้าต่าง Gateway เริ่มต้น -->
+  <div id="gatewayScreen" class="gateway-overlay">
+    <div class="gateway-title">Balenrista</div>
+    <div class="gateway-subtitle">กรุณาเลือกรูปแบบการรับสินค้า</div>
+    
+    <div class="gateway-btn-group">
+      <!-- ปุ่มรับที่ร้าน -->
+      <button class="gateway-btn" onclick="selectOrderType('pickup')">
+        <i class="ph-bold ph-storefront"></i>
+        รับที่ร้าน (ไม่มีขั้นต่ำ)
+      </button>
+      
+      <!-- ปุ่มจัดส่งนอกสถานที่ -->
+      <button class="gateway-btn" onclick="selectOrderType('delivery')">
+        <i class="ph-bold ph-moped"></i>
+        จัดส่งนอกสถานที่
+      </button>
+    </div>
+  </div>
 
         <div class="header">
     <div class="header-title">
@@ -1190,6 +1272,39 @@ else {
         list.innerHTML = '<div style="text-align:center; color:#ff6b6b; padding: 20px;">ไม่สามารถโหลดประวัติได้</div>'; 
     }
 }
+      // สร้างตัวแปรเก็บรูปแบบออเดอร์ และขั้นต่ำจำนวนแก้ว
+  let currentOrderType = ''; 
+  let minimumCupsRequired = 1; // ค่าเริ่มต้น
+
+  function selectOrderType(type) {
+    currentOrderType = type;
+    
+    // ซ่อนหน้าต่าง Gateway ด้วยเอฟเฟกต์เฟด
+    const gateway = document.getElementById('gatewayScreen');
+    gateway.style.opacity = '0';
+    setTimeout(() => {
+      gateway.style.display = 'none';
+    }, 300);
+
+    // ปรับเปลี่ยนเงื่อนไขแบนเนอร์ด้านบนตามที่ลูกค้าเลือก
+    const alertBanner = document.getElementById('alertBanner');
+    
+    if (type === 'delivery') {
+      minimumCupsRequired = 4;
+      alertBanner.innerHTML = '<i class="ph-bold ph-warning-circle"></i> เงื่อนไขบริการ: จัดส่งนอกสถานที่ กรุณาสั่งซื้อ 4 แก้วขึ้นไป';
+      alertBanner.style.display = 'block';
+      alertBanner.style.color = '#ff6b6b'; // สีแดงแจ้งเตือน
+    } else if (type === 'pickup') {
+      minimumCupsRequired = 1; // สั่งกี่แก้วก็ได้
+      alertBanner.innerHTML = '<i class="ph-bold ph-check-circle"></i> รับที่ร้าน: สั่งกี่แก้วก็ได้ ไม่มีขั้นต่ำค่ะ';
+      alertBanner.style.display = 'block';
+      alertBanner.style.color = '#4CAF50'; // สีเขียวผ่านเงื่อนไข
+    }
+    
+    // หากต้องการนำไปใช้กับฟังก์ชันอื่น เช่น การตรวจสอบในตะกร้า 
+    // สามารถเรียกใช้ตัวแปร currentOrderType หรือ minimumCupsRequired ได้ทันที
+  }
+
   </script>
 </body>
 </html>
