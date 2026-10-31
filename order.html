@@ -205,6 +205,140 @@
     .confirm-btn:active { transform: scale(0.98); box-shadow: inset 4px 4px 8px rgba(0,0,0,0.5); }
     .confirm-btn:disabled { opacity: 0.5; box-shadow: var(--shadow-in); background: var(--bg-main); color: var(--text-muted); }
 
+
+    /* ปุ่มติดต่อร้านแบบลอย เหนือปุ่มยืนยันออเดอร์ */
+    .cart-bar {
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 20px max(16px, env(safe-area-inset-bottom));
+    }
+    .cart-actions {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 12px;
+    }
+    .contact-float-btn {
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgba(211,208,201,.12);
+      border-radius: 50%;
+      background: var(--bg-main);
+      color: var(--col-active);
+      box-shadow: var(--shadow-out);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .contact-float-btn:active { box-shadow: var(--shadow-in); transform: scale(.94); }
+    .contact-float-btn svg { width: 23px; height: 23px; display: block; }
+
+    /* Popup ช่องทางติดต่อร้าน */
+    .contact-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000001;
+      background: rgba(0,0,0,.78);
+      align-items: flex-end;
+      justify-content: center;
+      padding: 18px 14px max(18px, env(safe-area-inset-bottom));
+    }
+    .contact-overlay.show { display: flex; }
+    .contact-popup {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-main);
+      border-radius: 26px;
+      padding: 22px 20px 20px;
+      box-shadow: 0 -10px 35px rgba(0,0,0,.55), var(--shadow-out);
+      animation: contactRise .22s ease-out;
+    }
+    @keyframes contactRise {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .contact-popup-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .contact-brand {
+      color: var(--col-active);
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .contact-slogan {
+      color: var(--text-muted);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .contact-close {
+      flex: 0 0 34px;
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 50%;
+      color: var(--col-accent);
+      background: var(--bg-main);
+      box-shadow: var(--shadow-sm);
+      font-size: 17px;
+      cursor: pointer;
+    }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .contact-link {
+      min-height: 88px;
+      padding: 13px 6px 10px;
+      border-radius: 16px;
+      background: var(--bg-main);
+      box-shadow: var(--shadow-sm);
+      color: var(--col-accent);
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 500;
+      text-align: center;
+      transition: box-shadow .2s ease, transform .2s ease;
+    }
+    .contact-link:active { box-shadow: var(--shadow-in); transform: scale(.97); }
+    .contact-link svg { width: 25px; height: 25px; display: block; }
+    .contact-link .contact-phone { color: #8fc7a0; }
+    .contact-link .contact-line { color: #06C755; }
+    .contact-link .contact-facebook { color: #1877F2; }
+    .contact-link .contact-instagram { color: #E66A8D; }
+    .contact-link .contact-tiktok { color: var(--col-active); }
+    .contact-link .contact-map { color: #D96B5F; }
+    .contact-hours {
+      margin-top: 16px;
+      padding: 13px 14px;
+      border-radius: 14px;
+      background: var(--bg-main);
+      box-shadow: var(--shadow-in);
+      color: var(--text-muted);
+      font-size: 11px;
+      line-height: 1.7;
+      text-align: center;
+    }
+    .contact-hours strong { color: var(--col-active); font-weight: 600; }
+    @media (max-width: 360px) {
+      .contact-grid { gap: 9px; }
+      .contact-link { min-height: 82px; font-size: 10px; }
+    }
+
     /* โครงสร้างป๊อปอัพสไลด์ขึ้น */
     .sheet-overlay { position: fixed; top: 0; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; }
     .bottom-sheet { 
@@ -473,7 +607,60 @@
   </div>
 
   <div class="cart-bar" id="cartBar" style="display: none;">
+    <div class="cart-actions">
+      <button class="contact-float-btn" type="button" aria-label="ติดต่อร้าน Balenrista" title="ติดต่อร้าน" onclick="openContactPopup()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/>
+          <path d="M8.5 9.5c.5 2.5 2.5 4.5 5 5"/>
+        </svg>
+      </button>
+    </div>
     <button class="confirm-btn" id="confirmBtn" disabled>กำลังตรวจสอบสถานะร้าน...</button>
+  </div>
+
+  <div class="contact-overlay" id="contactOverlay" onclick="closeContactPopup(event)" aria-hidden="true">
+    <section class="contact-popup" role="dialog" aria-modal="true" aria-labelledby="contactPopupTitle">
+      <div class="contact-popup-head">
+        <div>
+          <div class="contact-brand" id="contactPopupTitle">Balenrista</div>
+          <div class="contact-slogan">ถ้าไม่เท่ เราไม่ขาย</div>
+        </div>
+        <button class="contact-close" type="button" aria-label="ปิด" onclick="closeContactPopup()">×</button>
+      </div>
+
+      <div class="contact-grid">
+        <a class="contact-link" href="tel:0823739960">
+          <svg class="contact-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2Z"/></svg>
+          <span>โทรหาร้าน</span>
+        </a>
+        <a class="contact-link" href="https://lin.ee/wkFhpXE" target="_blank" rel="noopener noreferrer">
+          <svg class="contact-line" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.4 4.6C17.5 2.9 14.9 2 12 2 6.5 2 2 5.6 2 10.1c0 4 3.6 7.3 8.5 8 .3.1.7.2.8.5.1.2 0 .6 0 .8l-.1.8c0 .2-.2.9.8.5 1-.4 5.4-3.2 7.4-5.5 1.4-1.5 2.6-3.4 2.6-5.9 0-2.1-.9-4-2.6-5.5ZM8 12.5H5.8V7.8h1.1v3.7H8v1Zm2 0H9V7.8h1v4.7Zm5.1 0H14l-2-3v3h-1V7.8h1l2 3v-3h1v4.7Zm3.7-3.8h-2v1h1.8v1h-1.8v.9h2v.9h-3V7.8h3v.9Z"/></svg>
+          <span>LINE Official</span>
+        </a>
+        <a class="contact-link" href="https://www.facebook.com/share/18NmSjns3c/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer">
+          <svg class="contact-facebook" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8.2h2.8l.4-3.2h-3.2V8.5c0-.9.3-1.6 1.6-1.6h1.7V4.1c-.3 0-1.4-.1-2.6-.1-2.6 0-4.4 1.6-4.4 4.5v2.1H7v3.2h2.8V22h3.7Z"/></svg>
+          <span>Facebook</span>
+        </a>
+        <a class="contact-link" href="https://www.instagram.com/balenrista?exln=MWZ6aW9sZzl5ZXh6Yg%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer">
+          <svg class="contact-instagram" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="18" cy="6" r="1" fill="currentColor" stroke="none"/></svg>
+          <span>Instagram</span>
+        </a>
+        <a class="contact-link" href="https://www.tiktok.com/@balenrista" target="_blank" rel="noopener noreferrer">
+          <svg class="contact-tiktok" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.6 7.2a6.8 6.8 0 0 1-4.2-1.5v8.1a5.8 5.8 0 1 1-5-5.7v3.1a2.8 2.8 0 1 0 1.9 2.6V2h3.1c.2 2.4 1.9 4.3 4.2 4.7v.5Z"/></svg>
+          <span>TikTok</span>
+        </a>
+        <a class="contact-link" href="https://maps.app.goo.gl/yP37KXsy9QCk9iJV9?g_st=ic" target="_blank" rel="noopener noreferrer">
+          <svg class="contact-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          <span>Google Maps</span>
+        </a>
+      </div>
+
+      <div class="contact-hours">
+        <strong>เวลาเปิดร้าน 06:00–13:00 น.</strong><br>
+        วันอังคาร–อาทิตย์<br>
+        วันจันทร์เปิดเฉพาะวันหยุดนักขัตฤกษ์หรือวันหยุดชดเชย
+      </div>
+    </section>
   </div>
 
   <div class="sheet-overlay" id="optionsOverlay" onclick="closeOptionsSheet()"></div>
@@ -1208,6 +1395,28 @@ else {
         document.body.style.cursor = 'default';
       });
     }
+
+
+    function openContactPopup() {
+      const overlay = document.getElementById('contactOverlay');
+      if (!overlay) return;
+      overlay.classList.add('show');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeContactPopup(event) {
+      const overlay = document.getElementById('contactOverlay');
+      if (!overlay) return;
+      if (event && event.target !== overlay) return;
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') closeContactPopup();
+    });
 
     function toggleHistory() {
         const popup = document.getElementById('historyPopup');
