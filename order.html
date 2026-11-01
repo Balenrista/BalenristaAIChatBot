@@ -517,92 +517,77 @@
       height: 14px !important; 
       display: block;
     }
-    /* 🌟 หน้าต่าง Gateway เลือกประเภทออเดอร์ */
+    /* Balenrista welcome + order type gateway */
     .gateway-overlay {
-      position: fixed;
-      inset: 0;
-      background-color: var(--bg-main);
-      z-index: 999999; /* ให้อยู่บนสุดตอนโหลดเว็บ */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      transition: opacity 0.3s ease;
+      position: fixed; inset: 0; z-index: 999999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 24px; background-color: var(--bg-main); transition: opacity .3s ease;
     }
-
-    .gateway-title {
-      font-family: 'Splash', cursive;
-      font-size: 42px;
-      color: #ff4757;
-      margin-bottom: 8px;
+    #welcomeScreen {
+      z-index: 1000001; text-align: center;
+      background: #101010 url('./assets/welcome-balenrista.webp') center center / cover no-repeat;
+      isolation: isolate;
     }
-
-    .gateway-subtitle {
-      font-size: 16px;
-      color: var(--text-muted);
-      margin-bottom: 40px;
-      text-align: center;
+    #welcomeScreen::before {
+      content: ''; position: absolute; inset: 0; z-index: -1;
+      background: linear-gradient(180deg, rgba(0,0,0,.12) 10%, rgba(0,0,0,.28) 48%, rgba(0,0,0,.88) 100%);
     }
-
-    .gateway-btn-group {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      width: 100%;
-      max-width: 320px;
+    .welcome-brand { margin-top: auto; color: #fff; font-family: 'Splash', cursive; font-size: clamp(42px, 12vw, 60px); text-shadow: 0 3px 18px #000; }
+    .welcome-caption { color: #f1eeee; font-size: 14px; letter-spacing: 2px; margin: 2px 0 26px; }
+    .welcome-start {
+      width: min(100%, 330px); min-height: 56px; border: 1px solid rgba(255,255,255,.22);
+      border-radius: 16px; background: #862122; color: #fff; font: 600 17px 'Prompt', sans-serif;
+      box-shadow: 0 8px 28px rgba(0,0,0,.35); cursor: pointer; margin-bottom: max(18px, env(safe-area-inset-bottom));
     }
-
+    .welcome-start:active { transform: scale(.98); background: #6f191b; }
+    #gatewayScreen {
+      background: #101010 url('./assets/order-type-background.webp') center center / cover no-repeat;
+      z-index: 1000000;
+    }
+    #gatewayScreen::before { content:''; position:absolute; inset:0; background:rgba(0,0,0,.66); }
+    #gatewayScreen > * { position: relative; }
+    .gateway-title { font-family:'Splash',cursive; font-size:42px; color:#fff; margin-bottom:8px; text-shadow:0 2px 14px #000; }
+    .gateway-subtitle { font-size:15px; color:#eee; margin-bottom:28px; text-align:center; }
+    .gateway-btn-group { display:flex; flex-direction:column; gap:16px; width:100%; max-width:360px; }
     .gateway-btn {
-      background: var(--bg-main);
-      border: none;
-      padding: 24px 20px;
-      border-radius: var(--border-radius-card);
-      box-shadow: var(--shadow-out);
-      color: var(--col-active);
-      font-family: 'Prompt', sans-serif;
-      font-size: 18px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      transition: all 0.2s ease;
+      position:relative; overflow:hidden; min-height:150px; padding:0; border:1px solid rgba(255,255,255,.18);
+      border-radius:18px; background:#1b1b1b; color:#fff; font:600 19px 'Prompt',sans-serif;
+      cursor:pointer; display:flex; align-items:flex-end; justify-content:flex-start; text-align:left;
+      box-shadow:0 8px 26px rgba(0,0,0,.35); isolation:isolate;
     }
-
-    .gateway-btn i {
-      font-size: 28px;
-      color: #4CAF50;
-    }
-
-    .gateway-btn:active {
-      box-shadow: var(--shadow-in);
-      transform: scale(0.97);
-    }
+    .gateway-btn::before { content:''; position:absolute; inset:0; z-index:-1; background-position:center; background-size:cover; transition:transform .25s ease; }
+    .gateway-btn.pickup::before { background-image:url('./assets/pickup-balenrista.webp'); }
+    .gateway-btn.delivery::before { background-image:url('./assets/delivery-balenrista.webp'); }
+    .gateway-btn::after { content:''; position:absolute; inset:0; z-index:-1; background:linear-gradient(0deg,rgba(0,0,0,.88),rgba(0,0,0,0) 78%); }
+    .gateway-btn span { padding:18px 20px; text-shadow:0 2px 8px #000; }
+    .gateway-btn i { font-size:23px; color:#fff; margin-right:9px; }
+    .gateway-btn:active { transform:scale(.985); }
+    @media (max-height: 650px) { .gateway-btn { min-height:125px; } .gateway-subtitle { margin-bottom:16px; } }
 
   </style>
 </head>
 <body>
-  <!-- 🌟 หน้าต่าง Gateway เริ่มต้น -->
-  <div id="gatewayScreen" class="gateway-overlay">
+  <!-- Welcome: มีปุ่มดำเนินการเพียงปุ่มเดียว -->
+  <div id="welcomeScreen" class="gateway-overlay">
+    <div class="welcome-brand">Balenrista</div>
+    <div class="welcome-caption">COFFEE • ORDER • ENJOY</div>
+    <button class="welcome-start" type="button" onclick="startOrderType()">เริ่มสั่งเครื่องดื่ม</button>
+  </div>
+
+  <!-- เลือกวิธีรับเครื่องดื่ม -->
+  <div id="gatewayScreen" class="gateway-overlay" style="display:none;">
     <div class="gateway-title">Balenrista</div>
-    <div class="gateway-subtitle">กรุณาเลือกรูปแบบการรับสินค้า</div>
-    
+    <div class="gateway-subtitle">เลือกวิธีรับเครื่องดื่มของคุณ</div>
     <div class="gateway-btn-group">
-      <!-- ปุ่มรับที่ร้าน -->
-      <button class="gateway-btn" onclick="selectOrderType('pickup')">
-        <i class="ph-bold ph-storefront"></i>
-        รับที่ร้าน (ไม่มีขั้นต่ำ)
+      <button class="gateway-btn pickup" type="button" onclick="selectOrderType('pickup')">
+        <span><i class="ph-bold ph-storefront"></i>รับที่ร้าน <small>(ไม่มีขั้นต่ำ)</small></span>
       </button>
-      
-      <!-- ปุ่มจัดส่งนอกสถานที่ -->
-      <button class="gateway-btn" onclick="selectOrderType('delivery')">
-        <i class="ph-bold ph-moped"></i>
-        จัดส่งนอกสถานที่
+      <button class="gateway-btn delivery" type="button" onclick="selectOrderType('delivery')">
+        <span><i class="ph-bold ph-moped"></i>จัดส่งนอกสถานที่</span>
       </button>
     </div>
   </div>
+
 
         <div class="header">
     <div class="header-title">
@@ -656,7 +641,7 @@
       </div>
 
       <div class="contact-grid">
-        <a class="contact-link" href="tel:0623739960">
+        <a class="contact-link" href="tel:0823739960">
           <svg class="contact-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2Z"/></svg>
           <span>โทรหาร้าน</span>
         </a>
@@ -1511,6 +1496,19 @@ else {
       // สร้างตัวแปรเก็บรูปแบบออเดอร์ และขั้นต่ำจำนวนแก้ว
   let currentOrderType = ''; 
   let minimumCupsRequired = 1; // ค่าเริ่มต้น
+
+  function startOrderType() {
+    const welcome = document.getElementById('welcomeScreen');
+    const gateway = document.getElementById('gatewayScreen');
+    if (!welcome || !gateway) return;
+    welcome.style.opacity = '0';
+    setTimeout(() => {
+      welcome.style.display = 'none';
+      gateway.style.display = 'flex';
+      gateway.style.opacity = '0';
+      requestAnimationFrame(() => { gateway.style.opacity = '1'; });
+    }, 300);
+  }
 
   function selectOrderType(type) {
     currentOrderType = type;
