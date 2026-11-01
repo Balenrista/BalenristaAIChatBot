@@ -1285,7 +1285,7 @@ else {
 
       const mainBtn = document.getElementById('confirmBtn');
       const sheetBtn = document.getElementById('sheetConfirmBtn');
-      const requiredQty = Number(minimumCupsRequired) || 1;
+      const requiredQty = currentOrderType === 'delivery' ? 4 : 1;
       const remainingQty = Math.max(0, requiredQty - totalQty);
 
       if (!shopIsOpen) {
@@ -1550,6 +1550,10 @@ else {
       alertBanner.style.display = 'block';
       alertBanner.style.color = '#4CAF50'; // สีเขียวผ่านเงื่อนไข
     }
+
+    // คำนวณขั้นต่ำจากประเภทที่เลือก และรีเฟรชปุ่มตะกร้าทันที
+    updateCartStatus();
+
     
     // หากต้องการนำไปใช้กับฟังก์ชันอื่น เช่น การตรวจสอบในตะกร้า 
     // สามารถเรียกใช้ตัวแปร currentOrderType หรือ minimumCupsRequired ได้ทันที
