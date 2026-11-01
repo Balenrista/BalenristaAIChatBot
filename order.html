@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Balenrista - Order Online</title>
   
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -517,76 +517,75 @@
       height: 14px !important; 
       display: block;
     }
-    /* Balenrista welcome + order type gateway */
+    /* Balenrista full-artwork screens */
     .gateway-overlay {
-      position: fixed; inset: 0; z-index: 999999;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 24px; background-color: var(--bg-main); transition: opacity .3s ease;
+      position: fixed; inset: 0; z-index: 999999; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      background-color: #050505; transition: opacity .3s ease;
+      overflow-x: hidden; overflow-y: auto;
     }
     #welcomeScreen {
-      z-index: 1000001; text-align: center;
-      background: #101010 url('./assets/welcome-balenrista.webp') center center / cover no-repeat;
-      isolation: isolate;
+      z-index: 1000001;
+      background: #050505 url('./assets/welcome-balenrista.webp') center center / 100% 100% no-repeat;
     }
-    #welcomeScreen::before {
-      content: ''; position: absolute; inset: 0; z-index: -1;
-      background: linear-gradient(180deg, rgba(0,0,0,.12) 10%, rgba(0,0,0,.28) 48%, rgba(0,0,0,.88) 100%);
-    }
-    .welcome-brand { margin-top: auto; color: #fff; font-family: 'Splash', cursive; font-size: clamp(42px, 12vw, 60px); text-shadow: 0 3px 18px #000; }
-    .welcome-caption { color: #f1eeee; font-size: 14px; letter-spacing: 2px; margin: 2px 0 26px; }
+    /* ปุ่มโปร่งใสวางทับพื้นที่ว่างใต้ภาพแมวใน Artwork */
     .welcome-start {
-      width: min(100%, 330px); min-height: 56px; border: 1px solid rgba(255,255,255,.22);
-      border-radius: 16px; background: #862122; color: #fff; font: 600 17px 'Prompt', sans-serif;
-      box-shadow: 0 8px 28px rgba(0,0,0,.35); cursor: pointer; margin-bottom: max(18px, env(safe-area-inset-bottom));
+      position: absolute; left: 19%; width: 62%; height: 9%;
+      top: 61%; border: 0; border-radius: 14px;
+      background: rgba(134,33,34,0); cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
-    .welcome-start:active { transform: scale(.98); background: #6f191b; }
+    .welcome-start:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
     #gatewayScreen {
-      background: #101010 url('./assets/order-type-background.webp') center center / cover no-repeat;
-      z-index: 1000000;
+      z-index: 1000000; align-items: center; justify-content: center;
+      background: #050505 url('./assets/order-type-background.webp') center center / 100% 100% no-repeat;
     }
-    #gatewayScreen::before { content:''; position:absolute; inset:0; background:rgba(0,0,0,.66); }
-    #gatewayScreen > * { position: relative; }
-    .gateway-title { font-family:'Splash',cursive; font-size:42px; color:#fff; margin-bottom:8px; text-shadow:0 2px 14px #000; }
-    .gateway-subtitle { font-size:15px; color:#eee; margin-bottom:28px; text-align:center; }
-    .gateway-btn-group { display:flex; flex-direction:column; gap:16px; width:100%; max-width:360px; }
-    .gateway-btn {
-      position:relative; overflow:hidden; min-height:150px; padding:0; border:1px solid rgba(255,255,255,.18);
-      border-radius:18px; background:#1b1b1b; color:#fff; font:600 19px 'Prompt',sans-serif;
-      cursor:pointer; display:flex; align-items:flex-end; justify-content:flex-start; text-align:left;
-      box-shadow:0 8px 26px rgba(0,0,0,.35); isolation:isolate;
+    .order-art-cards {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: clamp(8px, 1.6vh, 16px);
+      padding: 0 0 1vh;
     }
-    .gateway-btn::before { content:''; position:absolute; inset:0; z-index:-1; background-position:center; background-size:cover; transition:transform .25s ease; }
-    .gateway-btn.pickup::before { background-image:url('./assets/pickup-balenrista.webp'); }
-    .gateway-btn.delivery::before { background-image:url('./assets/delivery-balenrista.webp'); }
-    .gateway-btn::after { content:''; position:absolute; inset:0; z-index:-1; background:linear-gradient(0deg,rgba(0,0,0,.88),rgba(0,0,0,0) 78%); }
-    .gateway-btn span { padding:18px 20px; text-shadow:0 2px 8px #000; }
-    .gateway-btn i { font-size:23px; color:#fff; margin-right:9px; }
-    .gateway-btn:active { transform:scale(.985); }
-    @media (max-height: 650px) { .gateway-btn { min-height:125px; } .gateway-subtitle { margin-bottom:16px; } }
+    .art-card {
+      display: block; width: min(57vw, 250px); aspect-ratio: 753 / 914;
+      flex: 0 1 auto; padding: 0; margin: 0; border: 0; border-radius: 0;
+      background: transparent; box-shadow: none; overflow: visible;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .art-card img {
+      display: block; width: 100%; height: 100%; object-fit: contain;
+      border: 0; border-radius: 0; box-shadow: none;
+    }
+    .art-card:active { transform: scale(.98); }
+    .art-card:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 18px; }
+    @media (max-height: 720px) {
+      .art-card { width: min(49vw, 205px); }
+      .order-art-cards { gap: 5px; }
+    }
+    @media (min-width: 600px) {
+      .art-card { width: min(35vw, 270px); }
+    }
 
   </style>
 </head>
 <body>
-  <!-- Welcome: มีปุ่มดำเนินการเพียงปุ่มเดียว -->
+  <!-- Welcome artwork: ข้อความอยู่ในภาพแล้ว เหลือปุ่มจริงเพียงปุ่มเดียว -->
   <div id="welcomeScreen" class="gateway-overlay">
-    <div class="welcome-brand">Balenrista</div>
-    <div class="welcome-caption">COFFEE • ORDER • ENJOY</div>
-    <button class="welcome-start" type="button" onclick="startOrderType()">เริ่มสั่งเครื่องดื่ม</button>
+    <button class="welcome-start" type="button" onclick="startOrderType()" aria-label="เริ่มสั่งเครื่องดื่ม"></button>
   </div>
 
-  <!-- เลือกวิธีรับเครื่องดื่ม -->
+  <!-- Artwork หน้าเลือกวิธีรับ: การ์ดเป็นภาพจริงที่กดได้ -->
   <div id="gatewayScreen" class="gateway-overlay" style="display:none;">
-    <div class="gateway-title">Balenrista</div>
-    <div class="gateway-subtitle">เลือกวิธีรับเครื่องดื่มของคุณ</div>
-    <div class="gateway-btn-group">
-      <button class="gateway-btn pickup" type="button" onclick="selectOrderType('pickup')">
-        <span><i class="ph-bold ph-storefront"></i>รับที่ร้าน <small>(ไม่มีขั้นต่ำ)</small></span>
+    <div class="order-art-cards">
+      <button class="art-card pickup" type="button" onclick="selectOrderType('pickup')" aria-label="รับที่ร้าน">
+        <img src="./assets/pickup-balenrista.webp" alt="รับที่ร้าน Pick Up">
       </button>
-      <button class="gateway-btn delivery" type="button" onclick="selectOrderType('delivery')">
-        <span><i class="ph-bold ph-moped"></i>จัดส่งนอกสถานที่</span>
+      <button class="art-card delivery" type="button" onclick="selectOrderType('delivery')" aria-label="จัดส่ง Delivery">
+        <img src="./assets/delivery-balenrista.webp" alt="จัดส่ง Delivery">
       </button>
     </div>
   </div>
+
 
 
         <div class="header">
