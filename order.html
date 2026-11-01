@@ -1285,13 +1285,15 @@ else {
 
       const mainBtn = document.getElementById('confirmBtn');
       const sheetBtn = document.getElementById('sheetConfirmBtn');
+      const requiredQty = Number(minimumCupsRequired) || 1;
+      const remainingQty = Math.max(0, requiredQty - totalQty);
 
       if (!shopIsOpen) {
         const textClose = "ขณะนี้ร้านปิดทำการ";
         [mainBtn, sheetBtn].forEach(btn => {
-          btn.innerText = textClose; 
+          btn.innerText = textClose;
           btn.disabled = true;
-          btn.style.backgroundColor = "var(--bg-main)"; 
+          btn.style.backgroundColor = "var(--bg-main)";
           btn.style.color = "var(--text-muted)";
           btn.style.boxShadow = "var(--shadow-in)";
           btn.style.cursor = "not-allowed";
@@ -1299,29 +1301,29 @@ else {
         return;
       }
 
-      if (totalQty < 4) {
-        const textLock = `ดูตะกร้าสินค้า (มีแล้ว ${totalQty} แก้ว)`;
+      // Pick Up ต้องมีอย่างน้อย 1 แก้ว ส่วน Delivery ต้องมีอย่างน้อย 4 แก้ว
+      if (totalQty < requiredQty) {
+        const textLock = totalQty === 0
+          ? "เลือกเครื่องดื่มเพื่อเริ่มสั่ง"
+          : `ดูตะกร้าสินค้า (มีแล้ว ${totalQty} แก้ว)`;
+
         mainBtn.innerText = textLock;
-        mainBtn.disabled = (totalQty === 0);
-        
-        if(totalQty === 0){
-           mainBtn.style.backgroundColor = "var(--bg-main)";
-           mainBtn.style.color = "var(--text-muted)";
-           mainBtn.style.boxShadow = "var(--shadow-in)";
-        } else {
-           mainBtn.style.backgroundColor = "var(--col-accent)";
-           mainBtn.style.color = "var(--text-dark)";
-           mainBtn.style.boxShadow = "4px 4px 10px rgba(0,0,0,0.5), inset 2px 2px 4px rgba(255,255,255,0.3)";
-        }
+        mainBtn.disabled = totalQty === 0;
+        mainBtn.style.backgroundColor = totalQty === 0 ? "var(--bg-main)" : "var(--col-accent)";
+        mainBtn.style.color = totalQty === 0 ? "var(--text-muted)" : "var(--text-dark)";
+        mainBtn.style.boxShadow = totalQty === 0
+          ? "var(--shadow-in)"
+          : "4px 4px 10px rgba(0,0,0,0.5), inset 2px 2px 4px rgba(255,255,255,0.3)";
         mainBtn.style.cursor = totalQty === 0 ? "not-allowed" : "pointer";
         mainBtn.onclick = totalQty > 0 ? openCartSheet : null;
 
-        sheetBtn.innerText = `ขาดอีก ${4 - totalQty} แก้ว (สั่งขั้นต่ำ 4 แก้ว)`;
+        sheetBtn.innerText = `ขาดอีก ${remainingQty} แก้ว (สั่งขั้นต่ำ ${requiredQty} แก้ว)`;
         sheetBtn.disabled = true;
         sheetBtn.style.backgroundColor = "var(--bg-main)";
         sheetBtn.style.color = "var(--text-muted)";
         sheetBtn.style.boxShadow = "var(--shadow-in)";
         sheetBtn.style.cursor = "not-allowed";
+        sheetBtn.onclick = null;
       } else {
         mainBtn.innerText = `ตรวจสอบตะกร้า (${totalQty} แก้ว)`;
         mainBtn.disabled = false;
@@ -1331,7 +1333,7 @@ else {
         mainBtn.style.cursor = "pointer";
         mainBtn.onclick = openCartSheet;
 
-        sheetBtn.innerText = `ยืนยันคำสั่งซื้อ`;
+        sheetBtn.innerText = "ยืนยันคำสั่งซื้อ";
         sheetBtn.disabled = false;
         sheetBtn.style.backgroundColor = "var(--col-accent)";
         sheetBtn.style.color = "var(--text-dark)";
