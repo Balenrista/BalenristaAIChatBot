@@ -549,14 +549,15 @@
       background: #050505 url('./assets/order-type-background.webp') center center / 100% 100% no-repeat;
     }
     .order-art-cards {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: clamp(8px, 1.6vh, 16px);
-      padding: 0 0 1vh;
+      position: absolute;
+      top: 43%; bottom: 15%; left: 0; right: 0;
+      display: flex; flex-direction: row; align-items: center; justify-content: center;
+      gap: clamp(8px, 2.5vw, 20px); padding: 0 3vw;
     }
     .art-card {
-      display: block; width: min(57vw, 250px); aspect-ratio: 753 / 914;
-      flex: 0 1 auto; padding: 0; margin: 0; border: 0; border-radius: 0;
+      display: block; width: min(42vw, 280px); height: auto; max-height: 100%;
+      aspect-ratio: 753 / 914; flex: 0 1 42%;
+      padding: 0; margin: 0; border: 0; border-radius: 0;
       background: transparent; box-shadow: none; overflow: visible;
       cursor: pointer; -webkit-tap-highlight-color: transparent;
     }
@@ -564,15 +565,19 @@
       display: block; width: 100%; height: 100%; object-fit: contain;
       border: 0; border-radius: 0; box-shadow: none;
     }
-    .art-card:active { transform: scale(.98); }
+    .art-card:active { transform: scale(.985); }
     .art-card:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 18px; }
     @media (max-height: 720px) {
-      .art-card { width: min(49vw, 205px); }
-      .order-art-cards { gap: 5px; }
+      .order-art-cards { top: 41%; bottom: 10%; gap: 1.5vw; }
+      .art-card { width: min(39vw, 230px); flex-basis: 39%; }
     }
     @media (min-width: 600px) {
-      .art-card { width: min(35vw, 270px); }
+      .art-card { width: min(40vw, 280px); flex-basis: 40%; }
     }
+
+    /* Three distinct screens: ordering UI remains hidden until a type is selected */
+    #orderScreen { min-height: 100vh; opacity: 1; }
+    #welcomeScreen, #gatewayScreen { transition: opacity .22s ease; }
 
   </style>
 </head>
@@ -596,6 +601,7 @@
 
 
 
+<div id="orderScreen" class="app-screen" style="display:none;">
         <div class="header">
     <div class="header-title">
       <span class="brand-balenrista">Balenrista</span>
@@ -622,6 +628,7 @@
   <div class="cart-bar" id="cartBar" style="display: none;">
     <button class="confirm-btn" id="confirmBtn" disabled>กำลังตรวจสอบสถานะร้าน...</button>
   </div>
+</div>
 
   <button class="contact-float-btn" id="contactFloatBtn" type="button"
           aria-label="ติดต่อร้าน Balenrista" title="ติดต่อร้าน"
@@ -1508,24 +1515,24 @@ else {
     const welcome = document.getElementById('welcomeScreen');
     const gateway = document.getElementById('gatewayScreen');
     if (!welcome || !gateway) return;
-    welcome.style.opacity = '0';
-    setTimeout(() => {
-      welcome.style.display = 'none';
-      gateway.style.display = 'flex';
-      gateway.style.opacity = '0';
-      requestAnimationFrame(() => { gateway.style.opacity = '1'; });
-    }, 300);
+    welcome.style.display = 'none';
+    welcome.style.opacity = '1';
+    gateway.style.display = 'flex';
+    gateway.style.opacity = '1';
   }
 
   function selectOrderType(type) {
     currentOrderType = type;
     
-    // ซ่อนหน้าต่าง Gateway ด้วยเอฟเฟกต์เฟด
+    // เปิดหน้าเว็บสั่งหลังจากลูกค้าเลือกประเภทแล้วเท่านั้น
     const gateway = document.getElementById('gatewayScreen');
-    gateway.style.opacity = '0';
-    setTimeout(() => {
+    const orderScreen = document.getElementById('orderScreen');
+    if (gateway && orderScreen) {
       gateway.style.display = 'none';
-    }, 300);
+      gateway.style.opacity = '1';
+      orderScreen.style.display = 'block';
+      window.scrollTo(0, 0);
+    }
 
     // ปรับเปลี่ยนเงื่อนไขแบนเนอร์ด้านบนตามที่ลูกค้าเลือก
     const alertBanner = document.getElementById('alertBanner');
